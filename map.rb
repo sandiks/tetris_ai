@@ -25,56 +25,58 @@ class Map
 
     i = pos[0]
     po = pos[1]
+    r0,r1,r2 = rr[i],rr[i+1],rr[i+2]
 
     case p_type
 
     when 'I'
       if po == 1
-        rr[i]+=4
+        r0+=4
       else
-        rr[i]+=1;rr[i+1]+=1;rr[i+2]+=1;rr[i+3]+=1;
+        r0+=1;r1+=1;r2+=1;rr[i+3]+=1;
       end
 
     when 'J'
       case po
-      when 1; rr[i]+=1;rr[i+1]+=3;
-      when 2; rr[i]+=1;rr[i+1]+=1;rr[i+2]+=2;
-      when 3; rr[i]+=1;rr[i+1]+=3;
-      when 4; rr[i]+=2;rr[i+1]+=1;rr[i+2]+=1;
+      when 1; r0+=1; r1+=3;
+      when 2; r0+=1; r1+=1; r2+=2;
+      when 3; r0+=1; r1+=3;
+      when 4; r0+=2; r1+=1; r2+=1;
       end
 
     when 'L'
       case po
-      when 1; rr[i]+=3;rr[i+1]+=1;
-      when 2; rr[i]+=1;rr[i+1]+=1;rr[i+2]+=2;
-      when 3; rr[i]+=1;rr[i+1]+=3;
-      when 4; rr[i]+=2;rr[i+1]+=1;rr[i+2]+=1;
+      when 1; r0+=3;r1+=1;
+      when 2; r0+=1;r1+=1;r2+=2;
+      when 3; r0+=1;r1+=3;
+      when 4; r0+=2;r1+=1;r2+=1;
       end
 
-    when 'O'; rr[i]+=2;rr[i+1]+=2;
+    when 'O'; r0+=2;r1+=2;
 
     when 'S'
       case po
-      when 1; rr[i]+=1;rr[i+1]+=2;rr[i+2]+=1;
-      when 2; rr[i]+=2;rr[i+1]+=2;
+      when 1; r0+=1;r1+=2;r2+=1;
+      when 2; r0+=2;r1+=2;
       end
 
     when 'Z'
       case po
-      when 1; rr[i]+=1;rr[i+1]+=2;rr[i+2]+=1;
-      when 2; rr[i]+=2;rr[i+1]+=2;
+      when 1; r0+=1;r1+=2;r2+=1;
+      when 2; r0+=2;r1+=2;
       end
 
 
     when 'T'
       case po
-      when 1; rr[i]+=1;rr[i+1]+=2;rr[i+2]+=1;
-      when 2; rr[i]+=3;rr[i+1]+=1;
-      when 3; rr[i]+=1;rr[i+1]+=2;rr[i+2]+=1;
-      when 4; rr[i]+=1;rr[i+1]+=3;
+      when 1; r0+=1;r1+=2;r2+=1;
+      when 2; r0+=3;r1+=1;
+      when 3; r0+=1;r1+=2;r2+=1;
+      when 4; r0+=1;r1+=3;
       end
 
     end
+    rr[i],rr[i+1],rr[i+2] = r0,r1,r2
 
   end
 
