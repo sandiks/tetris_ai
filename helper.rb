@@ -1,3 +1,49 @@
+def detect_turnes(ptype,orient)
+
+  tr = "turnright"
+  tl = "turnleft"
+  turnes = []
+  shift_x=0
+  shift_y=0
+
+  case ptype
+  when 'I';
+    case orient
+    when 1;  turnes=[tl]; shift_x=1; shift_y=2
+    when 2;  turnes=[tr]; shift_x=2; shift_y=2
+    end
+
+  when 'J'; 
+    case orient
+    when 1;  turnes=[tl]; shift_y=2
+    when 2;  turnes=[tl,tl]; shift_y=2
+    when 3 ; turnes = [tr]; shift_x=1
+    end
+
+
+  when 'L'
+    case orient
+    when 1;  turnes=[tl]; shift_y=1
+    when 2;  turnes=[tl,tl]
+    when 3 ; turnes = [tr]; shift_x=1
+    end
+
+  when 'O'; 
+
+  when 'S';  if orient==1; turnes=[tl]; shift_y=1; end
+
+  when 'Z';  if orient==1; turnes=[tl]; shift_y=1; end
+
+  when 'T';
+    case orient
+    when 3 ; turnes = [tr,]; shift_x=1
+    when 1;  turnes=[tl]
+    when 2;  turnes=[tl,tl]
+    end
+  end
+
+  {shift_x: shift_x, shift_y: shift_y, turnes: turnes}
+end
 
 def set_settings(arr,stt)
   case arr[1]
@@ -107,11 +153,10 @@ end
 
 #############find best variant
 def find_min_level(pos)
-  min= pos.map{|el| el[2]}.min
-  res= pos.find{|a| a[2] == min}
+  min= pos.map{|el| el[1]}.min
+  res= pos.find{|a| a[1] == min}
 
   if res.nil?
-
     pos.first
   else
     res

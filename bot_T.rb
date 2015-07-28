@@ -1,22 +1,5 @@
 require_relative  'helper'
 
-#type 1
-# ###
-#  #
-
-#type 2
-# #
-# ##
-# #
-
-#type 3
-#  #
-# ###
-
-#type 4
-#  #
-# ##
-#  #
 
 class BotT
 
@@ -38,7 +21,7 @@ class BotT
 
       #find right rule
       ruls.each do |rl|
-        pt = rl[0].to_i #piece orientation
+        orient = rl[0].to_i #piece orientation
         stt = rl[1]
 
         break if i+stt.size>11
@@ -48,10 +31,10 @@ class BotT
 
         #[pos, ptype, min_row_index, compatibility]
         found =case line
-        when ['+', '0', '+']; [i,   pt, rr[i+1],  10]   if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
-        when ['0', '+'];      [i,   pt, rr[i],    7]    if rr[i] == rr[i+1]-hh[1]
-        when ['+', '0'];      [i,   pt, rr[i+1],  7]    if rr[i]-hh[0] == rr[i+1]
-        when ['0', '0', '0']; [i,   pt, rr[i],    9]    if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+        when ['+', '0', '+']; [i, rr[i+1],  orient , 10]    if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+        when ['0', '+'];      [i, rr[i],    orient,    7]   if rr[i] == rr[i+1]-hh[1]
+        when ['+', '0'];      [i, rr[i+1],  orient,  7]     if rr[i]-hh[0] == rr[i+1]
+        when ['0', '0', '0']; [i, rr[i],    orient,   9]    if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
 
         end
 
@@ -63,7 +46,7 @@ class BotT
 
     end
 
-    max-min<4 ? find_max_compatibility(res) : find_min_level(res)
+    find_max_compatibility(res)
 
   end
 
