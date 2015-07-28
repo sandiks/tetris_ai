@@ -25,7 +25,7 @@ class BotS
 
       #find right rule
       ruls.each do |rl|
-        pt = rl[0].to_i #piece type
+        orint = rl[0].to_i #piece oriented index
         stt = rl[1]
 
         break if i+stt.size>11
@@ -35,9 +35,9 @@ class BotS
 
         #[pos, ptype, min_row_index, compatibility]
         found =case line
-        when ['0', '0', '+']; [i,   pt, rr[i],    10] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
-        when ['+', '0'];      [i+1, pt, rr[i+1],  9] if rr[i]-hh[0] == rr[i+1]
-        when ['0', '0', '0']; [i,   pt, rr[i],    0] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+        when ['0', '0', '+']; [i, orint, rr[i],    10] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+        when ['+', '0'];      [i, orint, rr[i+1],  9] if rr[i]-hh[0] == rr[i+1]
+        when ['0', '0', '0']; [i, orint, rr[i],    0] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
 
         end
 

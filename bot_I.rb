@@ -14,8 +14,8 @@ class BotI
     #
     #
     for i in 1..9
-      res<< [i,1,rr[i]] if rr[i+1] - rr[i] >= 3
-      res<< [i+1,1,rr[i+1]] if rr[i] - rr[i+1] >= 3
+      res<< [i,  1, rr[i]] if rr[i+1] - rr[i] >= 3
+      res<< [i+1,1, rr[i+1]] if rr[i] - rr[i+1] >= 3
 
     end
 
@@ -24,7 +24,7 @@ class BotI
       level = true
       3.times { |k| level = false if  rr[i+k]!= rr[i+k+1]}
 
-      res<< [i,2,rr[i]] if level
+      res<< [i,0,rr[i]] if level
     end
     p res
 
