@@ -1,17 +1,7 @@
-require_relative  'bot_I'
-require_relative  'bot_J'
-require_relative  'bot_L'
-require_relative  'bot_O'
-require_relative  'bot_S'
-require_relative  'bot_T'
-require_relative  'bot_Z'
+require_relative  'bot'
 require_relative  'helper'
 
 class BlackBox
-  def self.make_movies(game, type)
-    mm = game.map
-
-  end
 
   def self.detect_position(map, ptype)
 
@@ -19,91 +9,141 @@ class BlackBox
     res = check_gaps(map, ptype)
     return if not res.nil?
 
-    pos =  case ptype
-    when 'I'; BotI.anlz(map, ptype)
-    when 'J'; BotJ.anlz map
-    when 'L'; BotL.anlz map
-    when 'O'; BotO.anlz(map, ptype)
-    when 'S'; BotS.anlz(map, ptype)
-    when 'Z'; BotZ.anlz(map, ptype)
-    when 'T'; BotT.anlz(map, ptype)
-
-    end
-    pos
+    pos = anlz(map, ptype)
     #set_piece(map, ptype, pos)
 
   end
 
-  def self.set_piece(map, p_type, pos)
-    rr = map.rr
-    gg = map.gaps
+  def self.anlz(map, piece_type)
 
-    if pos.nil?
+    ruls = load_rules(piece_type)
+    rr = map.rr #get top line
 
-      return
+    max = rr.max
+    min = rr.min
+
+    res=[]
+
+
+    #check rules
+    for i in 1..map.w
+
+      #find right rule
+      ruls.each do |rl|
+        orient = rl[0].to_i #piece oriented index
+        stt = rl[1]
+
+        next if i+stt.size>map.w+1
+
+        line = stt.map { |ss|  ss.start_with?('0') ? '0' :  ss[0]  }
+
+        hh = stt.map { |ss|  ss.to_i  }
+
+        found =  case piece_type
+        when 'I'; anlz_I(i,line,hh,rr)
+        when 'J'; anlz_J(i,line,hh,rr)
+        when 'L'; anlz_L(i,line,hh,rr)
+        when 'O'; anlz_O(i,line,hh,rr)
+        when 'S'; anlz_S(i,line,hh,rr)
+        when 'Z'; anlz_Z(i,line,hh,rr)
+        when 'T'; anlz_T(i,line,hh,rr)
+        end
+
+        unless found.nil?
+          res<< (found<<orient)
+          #p found
+        end
+      end
     end
 
-    i = pos[0]
-    orient = orients[2]
-
-    r0,r1,r2 = rr[i],rr[i+1],rr[i+2]
-
-    case p_type
-
-    when 'I'
-      case p
-      when 0; r0+=1;r1+=1;r2+=1;rr[i+3]+=1;
-      when 1; r0+=4
-      end
-
-    when 'J'
-      case orient
-      when 0; r0+=2; r1+=1; r2+=1;
-      when 1; r0+=1; r1+=3;
-      when 2; r0+=1; r1+=1; r2+=2;
-      when 3; r0+=1; r1+=3;
-      end
-
-    when 'L'
-      case orient
-      when 0; r0+=1;r1+=1;r2+=2;
-      when 1; r0+=1;r1+=3;
-      when 2; r0+=2;r1+=1;r2+=1;
-      when 3; r0+=3;r1+=1;
-      end
-
-    when 'O'; r0+=2;r1+=2;
-
-    when 'S'
-      case orient
-      when 0;
-        gg[i+2]=r2+1 if r1==r2
-        r0+=1;r1+=2;r2=r1;
-
-      when 1; r0+=2;r1+=2;
-      end
-
-    when 'Z'
-      case orient
-      when 0; r1+=2; r0=r1; r2+=1;
-      when 1; r0+=2;r1+=2;
-      end
+    find_max_compatibility(res)
+  end
 
 
-    when 'T'
-      case orient
-      when 1; r0+=1;r1+=2;r2+=1;
-      when 2; r0+=3;r1+=1;
-      when 3; r0+=1;r1+=2;r2+=1;
-      when 4; r0+=1;r1+=3;
-      end
+  #############analize each piece
 
+
+  def self.anlz_I(i, line, hh, rr )
+    found =case line
+    when ['0', '+'];            [i,   rr[i],    10] if rr[i] == rr[i+1]-hh[1]
+    when ['+', '0'];            [i+1, rr[i+1],  10] if rr[i]-hh[0] == rr[i+1]
+    when ['0', '0', '0', '0'];  [i,   rr[i],    8] if fit_row_line(rr, i, ['0','0','0','0'])
     end
-    rr[i],rr[i+1],rr[i+2] = r0,r1,r2 if i<map.w-2
-    rr[i],rr[i+1] = r0,r1 if i== map.w-1
-    rr[i] = r0 if i== map.w
+  end
+
+  def self.anlz_J(i, line, hh, rr )
+
+    found =case line
+    when ['0', '0', '-']; [i, rr[i],    10]       if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['0', '0', '+']; [i, rr[i],    7+hh[2]]  if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['0', '+'];      [i, rr[i],  9]          if rr[i] == rr[i+1]-hh[1]
+    when ['0', '0', '0']; [i, rr[i],    5]        if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['0', '0'];      [i,   rr[i],    8]      if rr[i] == rr[i+1]
+    end
 
   end
+
+  def self.anlz_L(i, line, hh, rr )
+
+    found =case line
+    when ['-','0', '0'];  [i, rr[i],    10]      if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['+', '0'];      [i, rr[i+1],   9]      if rr[i]-hh[0] == rr[i+1]
+    when ['+','0', '0'];  [i+1, rr[i+1],   7+hh[0]]  if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['0', '0', '0']; [i, rr[i],     5]      if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+    end
+
+  end
+
+  def self.anlz_O(i, line, hh, rr )
+    bonus = ( i==0 || i == rr.size-1 ? 1 : 0 )
+
+    found =case line
+    when ['0', '0', '+']; [i,   rr[i],    9+bouns] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['+', '0', '0']; [i+1, rr[i+1],  9+bonus] if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['0', '0'];      [i,   rr[i],    8+bonus]  if rr[i] == rr[i+1]
+
+    end
+  end
+
+
+  #########
+  def self.anlz_S(i, line, hh, rr )
+
+    found =case line
+    when ['0', '0', '+']; [i, rr[i],    10] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['+', '0'];      [i, rr[i+1],  9] if rr[i]-hh[0] == rr[i+1]
+    when ['0', '0', '0']; [i, rr[i],    0] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+
+    end
+
+  end
+
+  ###########
+  def self.anlz_T(i, line, hh, rr )
+
+    found =case line
+    when ['+', '0', '+']; [i, rr[i+1],  10]    if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['0', '+'];      [i, rr[i],     7]   if rr[i] == rr[i+1]-hh[1]
+    when ['+', '0'];      [i, rr[i+1],   7]     if rr[i]-hh[0] == rr[i+1]
+    when ['0', '0', '0']; [i, rr[i],     9]    if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+
+    end
+
+  end
+
+  #############
+  def self.anlz_Z(i, line, hh, rr )
+    found =case line
+    when ['+','0','0'];   [i, rr[i+1],   10] if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['0', '+'];      [i, rr[i],     9] if rr[i] == rr[i+1]-hh[1]
+    when ['0', '+', '+']; [i, rr[i],     8] if rr[i] == rr[i+1]-hh[1] && rr[i+1]-hh[1] == rr[i+2]-hh[2]
+    when ['-', '0', '+']; [i, rr[i+1],   6] if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['0', '0', '0']; [i, rr[i],     5] if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+
+    end
+  end
+
+ 
 
 
 end

@@ -164,8 +164,8 @@ def find_min_level(pos)
 
 end
 def find_max_compatibility(pos)
-  max= pos.map{|el| el[3]}.max
-  res= pos.find{|a| a[3] == max}
+  max= pos.map{|el| el[2]}.max
+  res= pos.find{|a| a[2] == max}
 
   if res.nil?
     pos.first

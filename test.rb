@@ -5,15 +5,15 @@ require_relative  'helper'
 
 
 def test_bad_case
-  ptype = 'Z'
+  ptype = 'J'
   mm = Map.new
   mm.rr[1..10] = Array.new(10,6)
-  mm.rr[1]=0
-  mm.rr[2]=2
-  mm.rr[3]=4
+  mm.rr[9]=3
+  mm.rr[8]=3
+
   p BlackBox.detect_position(mm, ptype)
 end
-#test_bad_case
+
 
 def test_gap
   ptype = 'Z'
@@ -31,24 +31,15 @@ end
 
 def  test_moves
 
-
-  ptype = 'O'
+  ptype = 'I'
 
   mm = test_field_parser
   mm.show
 
-  start = [5,20]
-  pos=BlackBox.detect_position(mm, ptype)
-
-  p turnes = detect_turnes(ptype,pos[1])
-  start[0]+=turnes[:shift_x]
-  start[1]-=turnes[:shift_y]
-
-  dif_x = pos[0]-start[0]
-  moves_x =   dif_x<0 ? ['left']*(dif_x*-1) : ['right']*dif_x
-
-  p moves = turnes[:turnes]+moves_x+["drop"]
+  p Bot.make_movies(mm,[4,-1],ptype)
 end
+
+
 
 def  test_field_parser
 
@@ -57,9 +48,6 @@ def  test_field_parser
   mm = Map.new
   mm.parse_from(ff_str)
   mm
- 
+
 end
-
-
-
 test_moves
