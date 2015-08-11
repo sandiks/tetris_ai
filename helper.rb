@@ -1,4 +1,4 @@
-def detect_turnes(ptype,orient)
+def calc_turnes(ptype,orient)
 
   tr = "turnright"
   tl = "turnleft"
@@ -13,7 +13,7 @@ def detect_turnes(ptype,orient)
     when 2;  turnes=[tr]; shift_x=2; shift_y=2
     end
 
-  when 'J'; 
+  when 'J';
     case orient
     when 1;  turnes=[tl]; shift_y=2
     when 2;  turnes=[tl,tl]; shift_y=2
@@ -28,7 +28,7 @@ def detect_turnes(ptype,orient)
     when 3 ; turnes = [tr]; shift_x=1
     end
 
-  when 'O'; 
+  when 'O';
 
   when 'S';  if orient==1; turnes=[tl]; shift_y=1; end
 
@@ -61,7 +61,7 @@ def update_game(arr,gg)
   when "round"; gg.round = arr[3].to_i
   when "this_piece_type"; gg.this_piece_type = arr[3].strip
   when "next_piece_type"; gg.next_piece_type = arr[3].strip
-  when "this_piece_position";
+  when "this_piece_position";  gg.this_piece_position = arr[3].split(',').map { |e| e.to_i  }
 
   end
 end
@@ -165,12 +165,13 @@ def find_min_level(pos)
 end
 def find_max_compatibility(pos)
   max= pos.map{|el| el[2]}.max
-  res= pos.find{|a| a[2] == max}
+  res= pos.select{|a| a[2] == max}
+  #return find_min_level(res)
 
-  if res.nil?
-    pos.first
+  if res.size>1
+    find_min_level(res)
   else
-    res
+    res.first
   end
 
 end
@@ -189,42 +190,50 @@ def load_rules(ptype)
   when 'T'; "rules/rT.dt"
   end
 
+  dir = File.dirname(__FILE__)
+  file = File.join(dir,file)
+
   File.open(file, "r").each do |line|
     next if /\S/ !~ line
 
     arr = line.split(":")
-    res << [arr[0], arr[1].split(' ')]
+    cost = arr.size>2 ? arr[2].to_i : 3
+
+    res << [arr[0], arr[1].split(' '), cost]
   end
+
   res
 end
 
 def show_field(map)
 
   field = map.field
-  row = map.rr
-
+  rr = map.rr
+  gg = map.gaps
   p "Field 10x20"
-  p "gaps: #{map.gaps}"
+  #p "gaps: #{map.gaps}"
 
-  for i in 1..10
+  for i in 1..map.w
+
     ll = field[i]
-
-    last = ll.rindex('o')
-    last = 0 if last.nil?
-
-    ll[0] = '|'
-
-    diff = row[i]-last
-    ll[last+1..row[i]] = "+"*diff if diff >0
-
-    if map.gaps[i]!=0
-      ll[map.gaps[i]] = ' '
-    else
-      ll[1..last] =  "o" * last
-    end
-
-    p "#{ll}| last #{last} curr #{row[i]}"
-    ll.gsub!('+','o')
+    ll[0]='|'
+    ll[1..rr[i]] = "2"*rr[i] if rr[i]!=0
+    ll[gg[i]] = ' ' if gg[i]!=0
+    p "#{ll}| rr_#{i}=#{rr[i]}"
   end
 
+end
+def clean_lines(map)
+
+
+  rr = map.rr
+  gg = map.gaps
+  min = rr[1..map.w].min
+  removed_lines = (1..min).to_a - gg.uniq
+  removed_count = removed_lines.size
+
+  rr.map! {|x| x=x-removed_count } if removed_count>0
+  p "rr=#{rr} removed_lines=#{removed_lines} gaps=#{gg}"
+
+  removed_lines.reverse.each{|row| (1..map.w).each { |x| gg[x]-=1 if gg[x] > row } }
 end

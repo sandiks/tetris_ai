@@ -2,52 +2,84 @@
 require_relative  'game'
 require_relative  'helper'
 
+def test
+  map = Map.new
+  map.rr = [0,5,5,5,5,5,5,5,5,5,5]
 
+  map.gaps[1]=2
+  map.gaps[2]=3
 
-def test_bad_case
-  ptype = 'J'
-  mm = Map.new
-  mm.rr[1..10] = Array.new(10,6)
-  mm.rr[9]=3
-  mm.rr[8]=3
+  ptype = 'O'
+  0.times do
+    p best_pos = BlackBox.anlz(map, ptype)
+    Bot.set_piece(map, ptype, best_pos)
 
-  p BlackBox.detect_position(mm, ptype)
-end
-
-
-def test_gap
-  ptype = 'Z'
-  mm = Map.new
-  mm.rr[1..10] = Array.new(10,3)
-  mm.rr[1]=0
-  mm.rr[2]=2
-
-  #p fit_row_line(mm.rr, 5 , ['0','0','0'])
-  p check_gaps(mm,ptype)
-
-  #BlackBox.detect_position(mm, ptype)
-  #show_field(mm)
-end
-
-def  test_moves
-
-  ptype = 'I'
-
-  mm = test_field_parser
-  mm.show
-
-  p Bot.make_movies(mm,[4,-1],ptype)
-end
-
-
-
-def  test_field_parser
-
-  ff_str= "0,0,0,0,1,1,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0,0,0;2,2,2,2,0,0,0,0,0,0;3,3,3,3,3,3,3,3,3,3"
-
-  mm = Map.new
-  mm.parse_from(ff_str)
-  mm
+    show_field(map)
+  end
+  clean_lines(map)
+  show_field(map)
 
 end
-test_moves
+
+test
+
+def test_best_players
+  map = Map.new
+  arr_pcs = File.readlines('setosan.game')[1].split(' ')
+
+  for i in 0..arr_pcs.size-1
+    p "*****round #{i}"
+    curr_pt = arr_pcs[i]
+    next_pt = arr_pcs[i+1]
+
+    p best_pos = BlackBox.anlz(map, curr_pt)
+    Bot.set_piece(map, curr_pt, best_pos)
+
+    show_field(map)
+
+  end
+end
+
+#test_best_players
+
+def test_main
+  gg = Game.new
+  map = gg.map
+  stt = Settings.new
+
+  File.open("cmnds.txt", "r").each do |line|
+
+    s = line
+
+    next if /\S/ !~ s
+
+
+    arr = s.split(' ')
+    case arr[0]
+
+    when "settings"
+      set_settings(arr,stt)
+
+    when "update"
+      update_game(arr, gg) if arr[1] == 'game'
+      update_player(arr, gg.my) if arr[1] == 'player1'
+      update_player(arr, gg.other) if arr[1] != stt.your_bot
+
+    when "action"
+      start = gg.this_piece_position
+      ptype= gg.this_piece_type
+
+      map.parse_from(gg.my.field)
+      map.show
+
+      best_pos = BlackBox.anlz(map, ptype)
+      #best_pos = find_max_compatibility(all_pos)
+      Bot.set_piece(map, ptype, best_pos)
+
+      p "piece #{ptype} start=#{start} best_pos=#{best_pos} all pos="
+
+      p Bot.get_turnes(ptype,start,best_pos)
+
+    end
+  end
+end
