@@ -205,7 +205,7 @@ def load_rules(ptype)
   res
 end
 
-def show_field(map)
+def show_field(map,last=nil)
 
   field = map.field
   rr = map.rr
@@ -217,7 +217,12 @@ def show_field(map)
 
     ll = field[i]
     ll[0]='|'
-    ll[1..rr[i]] = "2"*rr[i] if rr[i]!=0
+    last =rr if last.nil?
+
+    #ll[1..rr[i]] = "o"*rr[i] if rr[i]!=0
+    ll[1..last[i]] = "o"*last[i] if last[i]!=0
+    ll[last[i]+1..rr[i]] = "+"*(rr[i]-last[i]) if last[i]!=rr[i]
+
     ll[gg[i]] = ' ' if gg[i]!=0
     p "#{ll}| rr_#{i}=#{rr[i]}"
   end
@@ -231,9 +236,11 @@ def clean_lines(map)
   min = rr[1..map.w].min
   removed_lines = (1..min).to_a - gg.uniq
   removed_count = removed_lines.size
-
-  rr.map! {|x| x=x-removed_count } if removed_count>0
-  p "rr=#{rr} removed_lines=#{removed_lines} gaps=#{gg}"
+  if removed_count>0
+    rr.map! {|x| x=x-removed_count }
+    rr[0]=0
+  end
+  p "min=#{min} removed_lines=#{removed_lines} gaps=#{gg}"
 
   removed_lines.reverse.each{|row| (1..map.w).each { |x| gg[x]-=1 if gg[x] > row } }
 end

@@ -21,26 +21,31 @@ def test
 
 end
 
-test
+#test
 
 def test_best_players
   map = Map.new
-  arr_pcs = File.readlines('setosan.game')[1].split(' ')
+  #arr_pcs = File.readlines('setosan.game')[1].split(' ')
+  arr_pcs = "T I J I T O S J O L J Z O L T J L J Z J".split(' ')
 
   for i in 0..arr_pcs.size-1
-    p "*****round #{i}"
+    p "-----round #{i+1}"
     curr_pt = arr_pcs[i]
     next_pt = arr_pcs[i+1]
 
-    p best_pos = BlackBox.anlz(map, curr_pt)
+    best_pos = BlackBox.anlz(map, curr_pt)
+    p "curr=#{curr_pt} next=#{next_pt} best_pos=#{best_pos}"
+
+    prev_rr = map.rr.clone
+    p "prev rr=#{prev_rr}"
     Bot.set_piece(map, curr_pt, best_pos)
 
-    show_field(map)
-
+    show_field(map, prev_rr)
+    clean_lines(map)
   end
 end
 
-#test_best_players
+test_best_players
 
 def test_main
   gg = Game.new

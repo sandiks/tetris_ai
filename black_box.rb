@@ -53,7 +53,7 @@ class BlackBox
 
           if not found.nil?
 
-            found<< cost #(max-found[1])
+            found<< cost +(max-found[1])
             found<< orient
             #found<<rule[1]
             res<< found
@@ -88,11 +88,15 @@ class BlackBox
   def self.anlz_J(i, line, hh, rr )
     max = rr.max
     found =case line
-    when ['0', '0', '-']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
+    when ['0', '0', '-']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] >= rr[i+2]-hh[2]
     when ['0', '0', '0']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['+', '0', '0', '0']; [i+1, rr[i+1]]   if fit_row_line(rr, i+1, ['0','0','0']) && rr[i]-hh[0] == rr[i+1]
     when ['0', '0', '+']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
     when ['0', '+'];      [i, rr[i]]   if rr[i] == rr[i+1]-hh[1]
     when ['0', '0'];      [i, rr[i]]   if rr[i] == rr[i+1]
+    when ['0', '0', '*']; [i,   rr[i]]    if rr[i] == rr[i+1] && i==rr.size-2
+    when ['-','0', '+'];  [i, rr[i+1]-2]      if rr[i]-hh[0] <= rr[i+1] && rr[i+1] <= rr[i+2]-hh[2]
+
     end
 
   end
@@ -101,10 +105,15 @@ class BlackBox
     max = rr.max
 
     found =case line
-    when ['-','0', '0'];  [i, rr[i]]      if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
-    when ['0', '0', '0']; [i, rr[i]]      if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
-    when ['+', '0'];      [i, rr[i+1]]    if rr[i]-hh[0] == rr[i+1]
-    when ['+','0', '0'];  [i+1, rr[i+1]]  if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['-','0', '0'];  [i, rr[i+1]-1]        if rr[i]-hh[0] <= rr[i+1] && rr[i+1] == rr[i+2]
+    when ['0', '0', '0']; [i, rr[i]]        if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['0', '0', '0', '+']; [i, rr[i]]   if fit_row_line(rr, i, ['0','0','0']) && rr[i+2] == rr[i+3]-hh[3]
+    when ['+', '0'];      [i, rr[i]-2]      if rr[i]-hh[0] == rr[i+1]
+    when ['+','0', '0'];  [i+1, rr[i+1]]    if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
+    when ['+','0', '-'];  [i+1, rr[i+1]]    if rr[i]-hh[0] >= rr[i+1] && rr[i+1] >= rr[i+2]-hh[2]
+    when ['0', '0'];      [i, rr[i]]        if rr[i] == rr[i+1]
+    when ['*', '0', '0']; [i,   rr[i]]      if rr[i] == rr[i+1] && i==1
+
     end
 
   end
