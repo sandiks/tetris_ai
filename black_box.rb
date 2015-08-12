@@ -20,6 +20,7 @@ class BlackBox
 
     ruls = load_rules(piece_type)
     rr = map.rr #get top line
+    gg = map.gaps
 
     max = rr.max
     min = rr[1..map.w].min
@@ -30,13 +31,14 @@ class BlackBox
     #check rules
     ruls.each do |rule|
 
+      orient = rule[0].to_i #piece oriented index
+      stt = rule[1]
+      cost = rule[2]
+
       for i in 1..map.w
 
-        orient = rule[0].to_i #piece oriented index
-        stt = rule[1]
-        cost = rule[2]
-        
         next if i+stt.size>map.w+1 && !stt.include?('*')
+        next if gg[i]!=0 && gg[i]<rr[i]
 
         line = stt.map { |ss|  ss.start_with?('0') ? '0' :  ss[0]  }
         hh = stt.map { |ss|  ss.to_i  }
@@ -88,14 +90,15 @@ class BlackBox
   def self.anlz_J(i, line, hh, rr )
     max = rr.max
     found =case line
-    when ['0', '0', '-']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] >= rr[i+2]-hh[2]
+    when ['0', '0', '-']; [i, rr[i]]   if rr[i] == rr[i+1]  && rr[i+1] = rr[i+2]-hh[2] 
+    when ['0', '0', 'd']; [i, rr[i]]   if rr[i] == rr[i+1]  && rr[i+1] >= rr[i+2]+2 
     when ['0', '0', '0']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
     when ['+', '0', '0', '0']; [i+1, rr[i+1]]   if fit_row_line(rr, i+1, ['0','0','0']) && rr[i]-hh[0] == rr[i+1]
     when ['0', '0', '+']; [i, rr[i]]   if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]-hh[2]
     when ['0', '+'];      [i, rr[i]]   if rr[i] == rr[i+1]-hh[1]
     when ['0', '0'];      [i, rr[i]]   if rr[i] == rr[i+1]
     when ['0', '0', '*']; [i,   rr[i]]    if rr[i] == rr[i+1] && i==rr.size-2
-    when ['-','0', '+'];  [i, rr[i+1]-2]      if rr[i]-hh[0] <= rr[i+1] && rr[i+1] <= rr[i+2]-hh[2]
+    when ['d','0', 'u'];  [i, rr[i+1]-2]      if rr[i]+2 <= rr[i+1] && rr[i+1] <= rr[i+2]-1
 
     end
 
@@ -105,14 +108,15 @@ class BlackBox
     max = rr.max
 
     found =case line
-    when ['-','0', '0'];  [i, rr[i+1]-1]        if rr[i]-hh[0] <= rr[i+1] && rr[i+1] == rr[i+2]
+    when ['-','0', '0'];  [i, rr[i+1]-1]        if rr[i]-hh[0] = rr[i+1]  && rr[i+1] == rr[i+2]
+    when ['d','0', '0'];  [i, rr[i+1]-1]        if rr[i]+2 <= rr[i+1]  && rr[i+1] == rr[i+2]
     when ['0', '0', '0']; [i, rr[i]]        if rr[i] == rr[i+1] && rr[i+1] == rr[i+2]
     when ['0', '0', '0', '+']; [i, rr[i]]   if fit_row_line(rr, i, ['0','0','0']) && rr[i+2] == rr[i+3]-hh[3]
     when ['+', '0'];      [i, rr[i]-2]      if rr[i]-hh[0] == rr[i+1]
     when ['+','0', '0'];  [i+1, rr[i+1]]    if rr[i]-hh[0] == rr[i+1] && rr[i+1] == rr[i+2]
-    when ['+','0', '-'];  [i+1, rr[i+1]]    if rr[i]-hh[0] >= rr[i+1] && rr[i+1] >= rr[i+2]-hh[2]
     when ['0', '0'];      [i, rr[i]]        if rr[i] == rr[i+1]
     when ['*', '0', '0']; [i,   rr[i]]      if rr[i] == rr[i+1] && i==1
+    when ['u','0', 'd'];  [i+1, rr[i+1]]    if rr[i]-1 >= rr[i+1] && rr[i+1] >= rr[i+2]+2
 
     end
 

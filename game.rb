@@ -58,8 +58,8 @@ class Map
       @rr[x] = ff[x].rindex('3') if @rr[x].nil?
       @rr[x] = 0 if @rr[x].nil?
       
-      @gaps[x] = ff[x].index('0')
-      @gaps[x] = 0 if @gaps[x]>=@rr[x]
+      @gaps[x] = ff[x].rindex('0',@rr[x])
+      @gaps[x] = 0 if @gaps[x].nil?
     end
   end
 

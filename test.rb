@@ -26,7 +26,7 @@ end
 def test_best_players
   map = Map.new
   #arr_pcs = File.readlines('setosan.game')[1].split(' ')
-  arr_pcs = "T I J I T O S J O L J Z O L T J L J Z J".split(' ')
+  arr_pcs = "OISSLOOTSOJSTIZJLIOSZJLILZJOZJSJOLIZ"
 
   for i in 0..arr_pcs.size-1
     p "-----round #{i+1}"
