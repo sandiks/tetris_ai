@@ -48,9 +48,9 @@ class BlackBox
 
   def self.fit_tmpl(i,templ, rr)
     rr_size = rr.size-1
-
+    templ = templ.split(' ')
     return false if templ[0] =='w' && i!=1
-    return false if templ[-1] =='w' && i!=rr.size-1
+    return false if templ[-1] =='w' && i+templ.size!=rr.size+1
 
     templ.select!{|x| x!='w'}
 
@@ -83,7 +83,7 @@ class BlackBox
     end
 
     #p "result: found correct subtemplate i:#{i} sub:#{rr[i..i+templ.size-1]}" if !found_wrong
-    #p found_wrong
+    #p "#{templ}" if i ==9
     return found_wrong.empty?
 
   end
@@ -92,14 +92,19 @@ class BlackBox
   def self.anlz_I(rr)
     res=[]
     for i in 1..rr.size-1
-      res<< [i+1,1, rr[i+1]+4]  if fit_tmpl(i,['+2','0','+2'] , rr)
-      res<< [i,1, rr[i]+4]    if fit_tmpl(i,['0','u2'] , rr)
-      res<< [i,1, rr[i]+4]    if fit_tmpl(i,['w','0','u2'] , rr)
-      res<< [i+1,1, rr[i+1]+4]   if fit_tmpl(i,['u2','0'] , rr)
-      res<< [i+1,1, rr[i+1]+4]    if fit_tmpl(i,['u2','0','w'] , rr)
-      res<< [i,0, rr[i]]    if fit_tmpl(i,['0', '0', '0', '0','w'] , rr)
-      res<< [i,0, rr[i]]    if fit_tmpl(i,['w','0', '0', '0', '0'] , rr)
-      res<< [i,0, rr[i]+1]    if fit_tmpl(i,['0', '0', '0', '0'] , rr)
+      res<< [i+1,1, rr[i+1]+2, "u2 0 u2"]  if fit_tmpl(i,"u2 0 u2"  , rr)
+      res<< [i,1, rr[i]+4, 		"0 u2"]    if fit_tmpl(i,"0 u2" 	, rr)
+      res<< [i+1,1, rr[i+1]+4, "u2 0"]     if fit_tmpl(i,"u2 0" 	, rr)
+      res<< [i,1, rr[i]+2, 		"w 0 u2"]  if fit_tmpl(i,"w 0 u2" 	, rr)
+      res<< [i+1,1, rr[i+1]+2, "u1 0 w"]   if fit_tmpl(i,"u2 0 w" 	, rr)
+      res<< [i,1, rr[i]+2, "0 w"]   	if fit_tmpl(i,"0 w", rr)
+      res<< [i,1, rr[i]+2, "w 0"]   	if fit_tmpl(i,"w 0", rr)
+
+      res<< [i,0, 	rr[i], "0 0 0 0 w"]    	if fit_tmpl(i, "0 0 0 0 w" , rr)
+      res<< [i,0, 	rr[i], "w 0 0 0 0"]    	if fit_tmpl(i, "w 0 0 0 0" , rr)
+      res<< [i,0, 	rr[i]+2, "0 0 0 0"]    	if fit_tmpl(i, "0 0 0 0" 	, rr)
+      res<< [i,0, 	rr[i]+1, "0 0 0 0 u1"]  if fit_tmpl(i, "0 0 0 0 u1" , rr)
+      res<< [i+1,0, rr[i+1]+1, "u1 0 0 0 0"] if fit_tmpl(i,"u1 0 0 0 0" , rr)
     end
     res
   end
@@ -110,27 +115,29 @@ class BlackBox
       #0
       #  #
       #  ###
-      res<< [i,0, rr[i]+2]  if fit_tmpl(i,['0','0','0'] , rr)
-      res<< [i+1,0, rr[i+1]+2]  if fit_tmpl(i,['u1','0','0','0'] , rr)
+      res<< [i,0, rr[i]+2]  if fit_tmpl(i,"0 0 0" , rr)
+      res<< [i+1,0, rr[i+1]+2]  if fit_tmpl(i, "u1 0 0 0" , rr)
 
       #1  #
       #   #
       #  ##
-      res<< [i,1, rr[i+1]+3]  if fit_tmpl(i,['0','0','u2'] , rr)
-      res<< [i+1,1, rr[i+2]+3]  if fit_tmpl(i,['u2','d1','0','u2'] , rr)
+      res<< [i,1, rr[i+1]+3]  if fit_tmpl(i,"0 0 u2" , rr)
+      res<< [i+1,1, rr[i+2]+3]  if fit_tmpl(i, "u2 d1 0 u2", rr)
 
       #2
       #  ###
       #    #
-      res<< [i,2, rr[i]+1]  if fit_tmpl(i,['0','0','-1'] , rr)
-      res<< [i,2, rr[i]+1+1]  if fit_tmpl(i,['0','0','d2'] , rr) #added +1 because of gap
-      res<< [i,2, rr[i+1]+1+1]  if fit_tmpl(i,['-1','0','-1'] , rr) #added +1 because of gap
+      res<< [i,2, rr[i]+1,		"+1 +1 0 u1"]  	if fit_tmpl(i,"+1 +1 0 +1", rr)
+      res<< [i,2, rr[i],		"+1 +1 0 u1"]  	if fit_tmpl(i,"+1 +1 0 u2", rr)
+      res<< [i,2, rr[i]+1,		"0 0 -1"]  	if fit_tmpl(i,"0 0 -1", rr)
+      res<< [i,2, rr[i]+1+1,	"0 0 d2"] 		if fit_tmpl(i,"0 0 d2", rr) #added +1 because of gap
+      res<< [i,2, rr[i+1]+1+1,"-1 0 -1"]  		if fit_tmpl(i,"-1 0 -1" , rr) #added +1 because of gap
 
       #3 ##
       #  #
       #  #
-      res<< [i,3, rr[i]+3]  if fit_tmpl(i,['0','+2'] , rr)
-      res<< [i+1,3, rr[i+2]+1]  if fit_tmpl(i,['u1','d2','0','u1'] , rr)
+      res<< [i,3, rr[i]+3]  	if fit_tmpl(i,"0 +2", rr)
+      res<< [i+1,3, rr[i+2]+1]  if fit_tmpl(i,"u1 d2 0 u1", rr)
     end
     res
   end
@@ -141,29 +148,29 @@ class BlackBox
       #0   #
       #  ###
 
-      res<< [i,0, rr[i]+2]  if fit_tmpl(i,['0','0','0'] , rr)
-      res<< [i,0, rr[i]+2]  if fit_tmpl(i,['0','0','0','u1'] , rr)
+      res<< [i,0, rr[i]+2]  if fit_tmpl(i,"0 0 0", rr)
+      res<< [i,0, rr[i]+2]  if fit_tmpl(i,"0 0 0 u1", rr)
 
       #1 ##
       #   #
       #   #
-      res<< [i,1, rr[i]+1]  if fit_tmpl(i,['+2','0','u1'] , rr)
-      res<< [i,1, rr[i]+1]  if fit_tmpl(i,['+2','0'] , rr)
-      res<< [i,1, rr[i]+1]  if fit_tmpl(i,['u2','0'] , rr)
+      res<< [i,1, rr[i],"+2 0 u1"]  	if fit_tmpl(i,"+2 0 u1", rr)
+      res<< [i,1, rr[i],"+2 0"]  		if fit_tmpl(i,"+2 0", rr)
+      res<< [i,1, rr[i]+2,"u2 0"]  		if fit_tmpl(i,"u3 0", rr)
 
       #2
       #  ###
       #  #
-      res<< [i,2, rr[i+1]+1]  if fit_tmpl(i,['-1','0','0'] , rr)
-      res<< [i,2, rr[i+1]+1+1]  if fit_tmpl(i,['d2','0','0'] , rr) #added +1 because of gap
-      res<< [i,2, rr[i+1]+1+1]  if fit_tmpl(i,['-1','0','-1'] , rr) #added +1 because of gap
+      res<< [i,2, rr[i+1]+1, "0 +1 +1"]  	if fit_tmpl(i,"0 +1 +1", rr)
+      res<< [i,2, rr[i+1]+1+1,"d2 0 0"]  	if fit_tmpl(i,"d2 0 0" , rr) #added +1 because of gap
+      res<< [i,2, rr[i+1]+1+1,"-1 0 -1"]  	if fit_tmpl(i,"-1 0 -1", rr) #added +1 because of gap
 
       #3  #
       #   #
       #   ##
-      res<< [i+1,3, rr[i+1]+3]  if fit_tmpl(i,['+2','0','0'] , rr)
-      res<< [i,3, rr[i]+3]      if fit_tmpl(i,['w','0','0'] , rr)
-      res<< [i+1,3, rr[i+1]+3]  if fit_tmpl(i,['u2','0','-1'] , rr)
+      res<< [i+1,3, rr[i+1]+3]  if fit_tmpl(i,"+2 0 0" , rr)
+      res<< [i,3, rr[i]+3]      if fit_tmpl(i,"w 0 0" , rr)
+      res<< [i+1,3, rr[i+1]+3]  if fit_tmpl(i,"u2 0 -1" , rr)
 
     end
     res
@@ -173,13 +180,13 @@ class BlackBox
   def self.anlz_O(rr)
     res=[]
     for i in 1..rr.size-1
-      res<< [i+1,0, rr[i+1]+2,"u1 0 0" ]  if fit_tmpl(i,['u1','0','0'] , rr)
-      res<< [i,0, rr[i]+2,"0 0 u1"]  if fit_tmpl(i,['0','0','u1'] , rr)
-      res<< [i,0, rr[i]+2,"w 0 0"]  if fit_tmpl(i,['w','0','0'] , rr)
-      res<< [i,0, rr[i]+2, "0 0 w"]  if fit_tmpl(i,['0','0','w'] , rr)
-      res<< [i,0, rr[i]+2+1, "0 0"]  if fit_tmpl(i,['0','0'] , rr)
-      res<< [i,0, rr[i+1]+2+1, "d1 0"]  if fit_tmpl(i,['d1','0'] , rr) # gap
-      res<< [i,0, rr[i]+2+1, "0 d1"]  if fit_tmpl(i,['0','d1'] , rr)   # gap
+      res<< [i+1,0, rr[i+1]+2,"u1 0 0" ]	if fit_tmpl(i,"u1 0 0", rr)
+      res<< [i,0, rr[i]+2,"0 0 u1"]			if fit_tmpl(i,"0 0 u1" , rr)
+      res<< [i,0, rr[i]+2,"w 0 0"]  		if fit_tmpl(i,"w 0 0" , rr)
+      res<< [i,0, rr[i]+2, "0 0 w"]  		if fit_tmpl(i,"0 0 w", rr)
+      res<< [i,0, rr[i]+2+1, "0 0"]  		if fit_tmpl(i,"0 0", rr)
+      res<< [i,0, rr[i+1]+2+1, "d1 0"]  	if fit_tmpl(i,"d1 0", rr) # gap
+      res<< [i,0, rr[i]+2+1, "0 d1"]  		if fit_tmpl(i,"0 d1", rr)   # gap
     end
     res
   end
@@ -190,12 +197,12 @@ class BlackBox
     res=[]
     for i in 1..rr.size-1
 
-      res<< [i,0, rr[i+2]+1]  if fit_tmpl(i,['0','0','+1'] , rr)
-      res<< [i,0, rr[i+2]+1+1]  if fit_tmpl(i,['d1','d1','0'] , rr) #added +1 because of gap
-      res<< [i,0, rr[i+2]+3]  if fit_tmpl(i,['0','0','0'] , rr) #added +1 because of gap
-      res<< [i,1, rr[i]+2]  if fit_tmpl(i,['+1','0'] , rr)
-      res<< [i,1, rr[i]+2]  if fit_tmpl(i,['w','0','d1','u2'] , rr)
-      res<< [i+1,1, rr[i+1]+2]  if fit_tmpl(i,['u1','0','d1','u2'] , rr)
+      res<< [i,0, rr[i+2]+1, "0 0 +1"]  	if fit_tmpl(i,"0 0 +1", rr)
+      res<< [i,0, rr[i+2]+1+1,"d1 d1 0"]  	if fit_tmpl(i,"d1 d1 0", rr) #added +1 because of gap
+      res<< [i,0, rr[i+2]+3, "0 0 0"]  		if fit_tmpl(i,"0 0 0", rr) #added +1 because of gap
+      res<< [i,1, rr[i]+2, "+1 0"]  		if fit_tmpl(i,"+1 0", rr)
+      res<< [i,1, rr[i]+2, "w 0 d1 u2"]  	if fit_tmpl(i,"w 0 d1 u2", rr)
+      res<< [i+1,1, rr[i+1]+2, "u1 0 d1 u2"]  if fit_tmpl(i,"u1 0 d1 u2", rr)
     end
 
     res
@@ -204,12 +211,12 @@ class BlackBox
   def self.anlz_Z(rr)
     res=[]
     for i in 1..rr.size-1
-      res<< [i,0, rr[i]+1, "+1 0 0"]  if fit_tmpl(i,['+1','0','0'] , rr)
-      res<< [i,0, rr[i]+1+1, "0 -1 d1"]  if fit_tmpl(i,['0','-1','d2'] , rr) #gap
-      res<< [i,0, rr[i]+3, "0 0 0"]  if fit_tmpl(i,['0','0','0'] , rr)
-      res<< [i,1, rr[i]+3, "0 +1"]  if fit_tmpl(i,['0','+1'] , rr)
-      res<< [i,1, rr[i]+3, "w 0 +1 u2"]  if fit_tmpl(i,['w','0','+1','u2'] , rr)
-      res<< [i,1, rr[i]+3, "0 +1 u2"]  if fit_tmpl(i,['0','+1','u2'] , rr)
+      res<< [i,0, rr[i]+1, "+1 0 0"]  	if fit_tmpl(i,"+1 0 0", rr)
+      res<< [i,0, rr[i]+1+1, "0 -1 d1"] if fit_tmpl(i,"0 -1 d1", rr) #gap
+      res<< [i,0, rr[i]+3, "0 0 0"]  	if fit_tmpl(i,"0 0 0", rr)
+      res<< [i,1, rr[i]+3, "0 +1"]  	if fit_tmpl(i,"0 +1" , rr)
+      res<< [i,1, rr[i]+3, "w 0 +1 u2"] if fit_tmpl(i,"w 0 +1 u2" , rr)
+      res<< [i,1, rr[i]+3, "0 +1 u2"]  	if fit_tmpl(i,"0 +1 u2", rr)
     end
     res
   end
@@ -218,18 +225,23 @@ class BlackBox
   def self.anlz_T(rr)
     res=[]
     for i in 1..rr.size-1
-      res<< [i,0, rr[i+1]+2]  if fit_tmpl(i,['0','0','0'] , rr)
-      res<< [i,0, rr[i+1]+2]  if fit_tmpl(i,['-1','0','0'] , rr)
-      res<< [i,0, rr[i+1]+2]  if fit_tmpl(i,['0','0','-1'] , rr)
+      res<< [i,	0, rr[i+1]+2,	"0 0 0"]  			if fit_tmpl(i,"0 0 0" , rr)
+      res<< [i,	0, rr[i+1]+2+1,	"-1 0 0"]  			if fit_tmpl(i,"-1 0 0" , rr) #gap
+      res<< [i,	0, rr[i+1]+2+1,	"0 0 -1"]  			if fit_tmpl(i,"0 0 -1" , rr) #gap
 
-      res<< [i,1, rr[i+1]+3]  if fit_tmpl(i,['+1','0','u1'] , rr)
-      res<< [i+1,1, rr[i+1]+2]  if fit_tmpl(i,['u1','0','d1'] , rr)
-      res<< [i,1, rr[i]+2]  if fit_tmpl(i,['w','0','d1','u1'] , rr)
+      res<< [i,	 1, rr[i+1]+3,	"+1 0 w"]  			if fit_tmpl(i,"+1 0 w" , rr)
+      res<< [i,	 1, rr[i+1]+3,	"+1 0 u1"]  		if fit_tmpl(i,"+1 0 u2" , rr)
+      res<< [i+1,1, rr[i+1]+2+1,	"u1 0 d2"]  	if fit_tmpl(i,"u1 0 d2" , rr) #gap
+      res<< [i,	 1, rr[i]+2,	"w 0 d1 u1"]  		if fit_tmpl(i,"w 0 d1 u1" , rr)
 
-      res<< [i,2, rr[i]+1]  if fit_tmpl(i,['0','-1','0'] , rr)
+      res<< [i,	 2, rr[i],	"+1 0 +1"]  			if fit_tmpl(i,"+1 0 +1" , rr)
 
-      res<< [i+1,3, rr[i+1]+3]  if fit_tmpl(i,['u1','0','+1'] , rr)
-      res<< [i,3, rr[i+2]+2]  if fit_tmpl(i,['u1','d1','0','w'] , rr)
+      res<< [i+1,3, rr[i+1]+3,	"u1 0 +1"]  		if fit_tmpl(i,"u1 0 +1" 	, rr)
+      res<< [i,	 3, rr[i+1]+2, 	"-1 0 u1"]  		if fit_tmpl(i,"-1 0 u1"	, rr)
+      res<< [i,	 3, rr[i+1]+2+1,"d2 0 u1"]  		if fit_tmpl(i,"d2 0 u1" , rr)
+      res<< [i+1,3, rr[i+2]+2, 	"u1 d1 0 w"]  		if fit_tmpl(i,"u1 d1 0 w"	, rr)
+      res<< [i+1,3, rr[i+1]+2, 	"u1 0 w"]  			if fit_tmpl(i,"u1 0 w"	, rr)
+      res<< [i,	 3, rr[i]+2, 	"w 0 u1"]  			if fit_tmpl(i,"w 0 u1"	, rr)
     end
     res
   end
