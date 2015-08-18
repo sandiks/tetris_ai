@@ -22,7 +22,7 @@ class Bot
 
   def self.get_turnes(ptype, start, pos)
 
-    turnes = calc_turnes(ptype, pos[1])
+    turnes = calc_turnes(ptype, pos[3])
     start[0]+=turnes[:shift_x]
     #start[1]-=turnes[:shift_y]
 
@@ -44,7 +44,7 @@ class Bot
     end
 
     i = pos[0]
-    orient = pos[1]
+    orient = pos[3]
 
     r0,r1,r2 = rr[i],rr[i+1],rr[i+2]
 

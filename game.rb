@@ -44,7 +44,7 @@ class Map
 
         @field[x][h] = arr[x-1]
       end
-      h=h-1
+      h -=1
     end
 
     fill_rr

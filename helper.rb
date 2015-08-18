@@ -151,30 +151,6 @@ def fit_row_line(rr,i,templ)
   true
 end
 
-#############find best variant
-def find_min_level(pos)
-  min= pos.map{|el| el[1]}.min
-  res= pos.find{|a| a[1] == min}
-
-  if res.nil?
-    pos.first
-  else
-    res
-  end
-
-end
-def find_max_compatibility(pos)
-  max= pos.map{|el| el[2]}.max
-  res= pos.select{|a| a[2] == max}
-  #return find_min_level(res)
-
-  if res.size>1
-    find_min_level(res)
-  else
-    res.first
-  end
-
-end
 
 def load_rules(ptype)
 
@@ -205,28 +181,65 @@ def load_rules(ptype)
   res
 end
 
-def show_field(map,last=nil)
+def show_field_h(map,last=nil)
 
   field = map.field
   rr = map.rr
   gg = map.gaps
   p "Field 10x20"
   #p "gaps: #{map.gaps}"
+#p "last:#{last} rr:#{rr}"
 
   for i in 1..map.w
 
     ll = field[i]
+
+    ll = ' '*map.h
     ll[0]='|'
     last =rr if last.nil?
 
-    #ll[1..rr[i]] = "o"*rr[i] if rr[i]!=0
+
     ll[1..last[i]] = "o"*last[i] if last[i]!=0
-    ll[last[i]+1..rr[i]] = "+"*(rr[i]-last[i]) if last[i]!=rr[i]
+    ll[last[i]+1..rr[i]] = "+"*(rr[i]-last[i]) if rr[i]-last[i]>=0
 
-    ll[gg[i]] = ' ' if gg[i]!=0
-    p "#{ll}| rr_#{i}=#{rr[i]}"
+    ll[gg[i]] = '-' if gg[i]!=0
+    p "#{ll}|#{i}: (last,rr) #{last[i]}-#{rr[i]}"
   end
+end
 
+def show_field(map,last=nil)
+
+  field = map.field
+  rr = map.rr
+  gg = map.gaps
+  p "Field 10x20"
+
+  for i in 1..map.w
+
+
+    ll = field[i]
+    ll = ' '*map.h
+    ll[0]='|'
+    last =rr if last.nil?
+
+    ll[1..last[i]] = "o"*last[i] if last[i]!=0
+    ll[last[i]+1..rr[i]] = "x"*(rr[i]-last[i]) if last[i]!=rr[i]
+
+    ll[gg[i]] = '-' if gg[i]!=0
+    field[i] = ll
+
+  end
+  #p rr
+  #p last
+  
+
+  10.downto(1) do |h|
+    line = "|"
+    for x in 1..map.w
+      line<<field[x][h]
+    end
+    p line<<"|"
+  end
 end
 def clean_lines(map)
 
@@ -240,7 +253,32 @@ def clean_lines(map)
     rr.map! {|x| x=x-removed_count }
     rr[0]=0
   end
-  p "min=#{min} removed_lines=#{removed_lines} gaps=#{gg}"
+  p "min=#{min} removed_lines=#{removed_lines} gaps=#{gg} row=#{rr}"
 
   removed_lines.reverse.each{|row| (1..map.w).each { |x| gg[x]-=1 if gg[x] > row } }
+  1.upto(map.w) do |x|
+     if gg[x] == rr[x] && rr[x]!=0
+      rr[x]-=1
+      gg[x]=0
+    end
+  end
+end
+
+#############find best variant
+def find_min_level(pos)
+  min= pos.map{|a| a[2]}.min
+  res= pos.find{|a| a[2] == min}
+end
+
+def find_max_compatibility(pos)
+  max= pos.map{|el| el[2]}.max
+  res= pos.select{|a| a[2] == max}
+  #return find_min_level(res)
+
+  if res.size>1
+    find_min_level(res)
+  else
+    res.first
+  end
+
 end
