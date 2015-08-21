@@ -1,3 +1,7 @@
+require_relative  'game'
+require_relative  'bot'
+require_relative  'black_box'
+
 def calc_turnes(ptype,orient)
 
   tr = "turnright"

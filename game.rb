@@ -1,6 +1,6 @@
 
 require_relative  'helper'
-require_relative  'black_box'
+
 
 class Settings
   attr_accessor :timebank, :time_per_move, :your_bot, :field_width, :field_height

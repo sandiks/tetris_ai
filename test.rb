@@ -1,10 +1,30 @@
 
-require_relative  'game'
+
 require_relative  'helper'
 
-what=2
+what=1
 
 
+def test_next_piece
+
+  map = Map.new
+  arr = "ZTSJSSJOISJOSLSTIJOLJJTLZSZOOJJLILZSJTSSJZOSJIZI" #my test
+  ss=arr.size
+
+  for i in 0..12
+
+    p "-----round #{i+1}"
+
+    curr_p = arr[i]
+    next_p = arr[i+1]
+
+    prev_rr = map.rr.clone
+    Bot.make_test_turn(map, curr_p, next_p)
+
+    show_field_h(map,prev_rr)
+    clean_lines(map)
+  end
+end
 
 def test_best_players
   map = Map.new
@@ -16,16 +36,11 @@ def test_best_players
   for i in 0..8
 
     p "-----round #{i+1}"
-    curr_pt = arr[i]
-    next_pt = arr[i+1]
+    curr_p = arr[i]
+    next_p = arr[i+1]
 
-    best_pos = BlackBox.anlz(map, curr_pt)
     prev_rr = map.rr.clone
-    
-    p "curr=#{curr_pt} next=#{next_pt} best_pos=#{best_pos}"
-
-    Bot.set_piece(map, curr_pt, best_pos)
-    p Bot.get_turnes(curr_pt,[3,-1],best_pos)
+    Bot.make_test_turn(map, curr_p, next_p)
 
     show_field_h(map,prev_rr)
     clean_lines(map)
@@ -60,19 +75,16 @@ def test_main
       map = gg.map
 
       map.parse_from(gg.my.field)
-      #map.show
-      #p map.rr
+      map.show
+      p map.rr
 
       start= gg.this_piece_position
-      ptype= gg.this_piece_type
-      res<<ptype
+      curr_p= gg.this_piece_type
+      next_pt= gg.next_piece_type
+      
+      res<<curr_p
 
-      #best_pos = BlackBox.anlz(map, ptype)
-
-      #p "piece #{ptype} start=#{start} best_pos=#{best_pos}"
-
-      #p Bot.get_turnes(ptype,start,best_pos)
-
+      Bot.make_test_turn(map, curr_p, next_p)
 
     end
   end
@@ -80,6 +92,9 @@ def test_main
 
 end
 
+#$stdout = STDOUT
+#$stdout = File.new('/tmp/out.txt', 'w')
 
+test_next_piece if what==1
 test_best_players if what==2
 test_main if what==22

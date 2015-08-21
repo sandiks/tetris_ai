@@ -64,29 +64,4 @@ def fit_tmpl(i,templ, rr)
 
 end
 
-def test_piece
-  map = Map.new
-  map.rr="0 5 5 5 6 5 4 4 4 5 5".split(' ').map{|x| x.to_i}
-
-  arr = "III" #my test
-  ss=arr.size
-
-  for i in 0..ss-1
-
-    p "-----round #{i+1}"
-    curr_pt = arr[i]
-    next_pt = arr[i+1]
-
-    best_pos = BlackBox.anlz(map, curr_pt)
-    prev_rr = map.rr.clone
-    
-    p "curr=#{curr_pt} next=#{next_pt} best_pos=#{best_pos}"
-
-    Bot.set_piece(map, curr_pt, best_pos)
-
-    show_field_h(map,prev_rr)
-    clean_lines(map)
-  end
-end
-#test_fit
-test_piece
+test_fit
