@@ -33,7 +33,7 @@ def main
 
     when "action"
 
-      puts Bot.make_movies(gg).join(',')
+      puts Bot.make_movies(gg)
       
       $stdout.flush
     end

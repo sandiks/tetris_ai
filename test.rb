@@ -5,40 +5,22 @@ require_relative  'helper'
 what=1
 
 
-def test_next_piece
-
-  map = Map.new
-  arr = "ZTSJSSJOISJOSLSTIJOLJJTLZSZOOJJLILZSJTSSJZOSJIZI" #my test
-  ss=arr.size
-
-  for i in 0..12
-
-    p "-----round #{i+1}"
-
-    curr_p = arr[i]
-    next_p = arr[i+1]
-
-    prev_rr = map.rr.clone
-    Bot.make_test_turn(map, curr_p, next_p)
-
-    show_field_h(map,prev_rr)
-    clean_lines(map)
-  end
-end
 
 def test_best_players
   map = Map.new
   #arr = File.readlines('setosan.game')[1].split(' ')
   #arr = "OISSLOOTSOJSTIZJLIOSZJLILZJOZJSJOLIZ"
-  arr = "ZTSJSSJOISJOSLSTIJOLJJTLZSZOOJJLILZSJTSSJZOSJIZI" #my test
+  #arr = "ZTSJSSJOISJOSLSTIJOLJJTLZSZOOJJLILZSJTSSJZOSJIZI" #my test
+  arr="JJSLLSOZSLSLLLLOIZZOTSJIIJOTJSJISOLOZZLLJST"
   ss=arr.size
 
-  for i in 0..8
+  for i in 0..ss-1
 
     p "-----round #{i+1}"
     curr_p = arr[i]
     next_p = arr[i+1]
-
+    break if next_p.nil?
+    
     prev_rr = map.rr.clone
     Bot.make_test_turn(map, curr_p, next_p)
 
@@ -80,8 +62,8 @@ def test_main
 
       start= gg.this_piece_position
       curr_p= gg.this_piece_type
-      next_pt= gg.next_piece_type
-      
+      next_p= gg.next_piece_type
+
       res<<curr_p
 
       Bot.make_test_turn(map, curr_p, next_p)
@@ -92,9 +74,10 @@ def test_main
 
 end
 
+path = '/tmp/out.txt'
 #$stdout = STDOUT
-#$stdout = File.new('/tmp/out.txt', 'w')
+$stdout = File.new(path, 'w')
 
-test_next_piece if what==1
-test_best_players if what==2
-test_main if what==22
+test_best_players if what==1
+test_main if what==2
+system "firefox "+ path
