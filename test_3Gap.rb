@@ -2,24 +2,25 @@ require_relative  'game'
 require_relative  'helper'
 
 
-
 def test
+
   map = Map.new
 
-  line = "0 13 12 14 12 13 11 12 13 12 13"
-  gg   = "0 0 0 0 5 0 4 10 0 0 0"
-  map.rr=line.split(' ').map{|x| x.to_i}
+  rr = "0 6 6 4 6 7 8 7 6 7 2"
+  gg   = "0 0 0 1 0 0 0 0 2 0 0"
+
+  map.rr=rr.split(' ').map{|x| x.to_i}
   map.gaps=gg.split(' ').map{|x| x.to_i}
 
-  pos = [5,1]
-  curr_p = 'T'
-  next_p = 'I'
+  map.fill_field_by_rr
+  
+  map.curr_piece='J'
+  map.next_piece='I'
 
+  #Bot.make_test_round(map,[[1,5], 2, 7, "0 d1"])
+  Bot.make_test_round(map)
 
-  p BBGaps.gap_belows(map,curr_p, pos)
-
-  #Bot.make_test_round(map, curr_p, next_p)
-
+  map.show
 end
 
 test

@@ -4,46 +4,26 @@ require_relative  'helper'
 
 what=0
 
+
+
+
 def test_map
-  map = Map.new
-  arr="II"
-  ornt=3
-  ss=arr.size
-
-  for i in 0..ss-1
-
-    p "-----round #{i+1}"
-    map.curr_piece = arr[i]
-    map.next_piece = arr[i+1]
-    break if map.next_piece.nil?
-
-
-    Bot.make_test_round(map)
-    #BlackBox.set_piece(map,map.curr_piece,[[1,0],ornt])
-    map.show
-
-  end
-end
-
-def test_best_players
   map = Map.new
   #arr = File.readlines('setosan.game')[1].split(' ')
   #arr = "OISSLOOTSOJSTIZJLIOSZJLILZJOZJSJOLIZ"
   #arr = "ZTSJSSJOISJOSLSTIJOLJJTLZSZOOJJLILZSJTSSJZOSJIZI" #my test
-  arr="JJSLLSOZSLSLLLLOIZZOTSJIIJOTJSJISOLOZZLLJST"
+  arr="LISIZLZO"
   ss=arr.size
 
-  for i in 0..ss-1
+  for i in 0..ss
 
     p "-----round #{i+1}"
     map.curr_piece = arr[i]
     map.next_piece = arr[i+1]
     break if map.next_piece.nil?
 
-    prev_rr = map.rr.clone
     Bot.make_test_round(map)
-
-    show_field_h(map,prev_rr)
+    map.show
 
   end
 end
@@ -98,6 +78,5 @@ path = '/tmp/out.txt'
 #$stdout = File.new(path, 'w')
 
 test_map if what==0
-test_best_players if what==1
-test_main if what==2
+test_main if what==1
 #system "firefox "+ path

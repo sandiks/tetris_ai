@@ -17,7 +17,7 @@ class BBGaps
       #set piece
 
       if res[:moves]=='left' ; pos[0][0]-=1; else pos[0][0]+=1; end
-      BlackBox.set_piece(map, curr_p, pos)
+      Bot.set_piece(map, curr_p, pos)
       #BBGaps.do_shift_piece(map, curr_p, pos, res[:moves])
 
       moves
@@ -72,70 +72,57 @@ class BBGaps
     res
   end
 
-  def self.do_shift_piece(map, p_type, pos, move)
 
+  def self.gap_belows(map,curr_piece, pos)
     rr = map.rr
     gg = map.gaps
 
-    i = pos[0]
-    orient = pos[1]
-    r0,r1,r2,r3 = rr[i],rr[i+1],rr[i+2],rr[i+3]
-
-    case p_type
-
-    when 'I'
-      case move
-      when "left"; r0,r1,r2 = r1,r2,r3; r3-=1; gg[i-1] =0;
-      when "right"; r1,r2,r3 = r0,r1,r2; r0-=1; gg[i+4] =0;
-      end
-
-    when 'J'
-      case move
-      when 'left'; r0,r1 = r1,r2; r2-=3; gg[i-1] =0;
-      when 'right'; r1,r2 = r0,r1; r0-=2; gg[i+3] =0;
-      end
-
-    when 'L'
-      case move
-      when 'left'; r0,r1 = r1,r2; r2-=2; gg[i-1] =0;
-      when 'right'; r1,r2 = r0,r1; r0-=3; gg[i+2] =0;
-      end
-
-
-    when 'T'
-      case move
-      when "left"; r0,r1 = r1,r2; r2-=1; gg[i-1] =0;
-      when "right"; r1,r2 = r0,r1; r0-=1; gg[i+3] =0;
-      end
-
-    end
-
-    rr[i],rr[i+1],rr[i+2],rr[i+3] = r0,r1,r2,r3
-  end
-
-  def self.gap_belows(map, curr_p, pos)
-    rr = map.rr
-    gg = map.gaps
-
-    i = pos[0]
+    i = pos[0][0]
     orient = pos[1]
 
-    case curr_p
+    templ = case [curr_piece,orient]
+    when ['I',0]; "1 1 1 1"
+    when ['I',1]; "1"
 
-    when 'I'
-      case orient
-      when 0; rr[i..i+3].min - gg[i..i+3].max
-      when 1; rr[i]-gg[i]
-      end
-    when 'J','L','Z','S','T'
-      case orient
-      when 0,2; rr[i..i+2].min - gg[i..i+2].max
-      when 1,3; rr[i..i+1].min - gg[i..i+1].max
-      end
-    when 'O'
-      rr[i..i+1].min - gg[i..i+1].max
+    when ['O',0]; "2 2"
 
+    when ['J',0]; "2 1 1"
+    when ['J',1]; "1 3"
+    when ['J',2]; "1 1 2"
+    when ['J',3]; "3 1"
+
+    when ['L',0]; "1 1 2"
+    when ['L',1]; "1 3"
+    when ['L',2]; "2 1 1"
+    when ['L',3]; "3 1"
+
+    when ['Z',0]; "1 2 1"
+    when ['Z',1]; "2 2"
+
+    when ['S',0]; "1 2 1"
+    when ['S',1]; "2 2"
+
+    when ['T',0]; "1 2 1"
+    when ['T',1]; "1 3"
+    when ['T',2]; "1 2 1"
+    when ['T',3]; "3 1"
     end
+
+    tt = templ.split(' ')
+    r = tt.size
+    res=[]
+    for j in i..i+r-1
+      added = tt[j-i].to_i
+      if gg[j]>0
+     gg[j]
+        diff=6-(rr[j]-gg[j])
+        diff=0 if diff<0
+        res<<diff+added
+      end
+    end
+
+    min =res.min
+    min.nil? ? 0 : min/2
 
   end
 end

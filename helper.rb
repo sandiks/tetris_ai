@@ -175,30 +175,6 @@ def show_field(map,last=nil)
     p line<<"|"
   end
 end
-def clean_lines(map)
-
-
-  rr = map.rr
-  gg = map.gaps
-  min = rr[1..map.w].min
-  removed_lines = (1..min).to_a - gg.uniq
-  removed_count = removed_lines.size
-  if removed_count>0
-    rr.map! {|x| x=x-removed_count }
-    rr[0]=0
-  end
-  #p "min=#{min} removed_lines=#{removed_lines} gaps=#{gg} row=#{rr}"
-
-  removed_lines.reverse.each{|row| (1..map.w).each { |x| gg[x]-=1 if gg[x] > row } }
-
-  # if gap on top, remove gap and inc rr[i]
-  1.upto(map.w) do |i|
-    if gg[i] == rr[i] && rr[i]!=0
-      rr[i]-=1
-      gg[i]=0
-    end
-  end
-end
 
 #############find best variant
 def find_min_level(pos)

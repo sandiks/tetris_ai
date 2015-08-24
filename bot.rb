@@ -8,7 +8,7 @@ class Bot
     start = gg.this_piece_position
     map.curr_piece = curr_p= gg.this_piece_type
     map.next_piece = next_p= gg.next_piece_type
-    
+
     map.parse_from(gg.my.field)
 
     moves = []
@@ -33,7 +33,7 @@ class Bot
 
   def self.process_piece(map)
 
-    poss_with_diff = BlackBox.anlz_simple(map)
+    poss_with_diff = BlackBox.anlz(map)
 
     best_pos_info = poss_with_diff.sort_by{|v| v[:sum]}.first
     best_pos = best_pos_info[:cpos]
@@ -56,7 +56,7 @@ class Bot
     end
 
     if test_pos.nil?
-      poss_with_diff = BlackBox.anlz_simple(map, true)
+      poss_with_diff = BlackBox.anlz(map, true)
 
       best_pos_info = poss_with_diff.sort_by{|v| v[:sum]}.first
       best_pos = best_pos_info[:cpos]
@@ -65,9 +65,9 @@ class Bot
     end
 
     #map.curr_pos = best_pos
-    p "curr=#{curr_p} next=#{next_p} info: #{best_pos_info}"
 
-    BlackBox.set_piece(map, curr_p, best_pos)
+    removed=Bot.set_piece(map, curr_p, best_pos)
+    p "curr=#{curr_p} next=#{next_p} info: #{best_pos_info} removed lines=#{removed}"
 
   end
 
@@ -97,6 +97,65 @@ class Bot
     return moves
 
   end
+  
+  def self.set_piece(map, curr_piece, pos)
 
+    map.repl4
+
+    rr = map.rr
+    ff = map.field
+    gg = map.gaps
+
+    i = pos[0][0]
+    h = pos[0][1]+1
+    orient = pos[1]
+
+    return if h>20
+
+    case curr_piece
+
+    when 'I'
+      case orient
+      when 0; ff[i][h],ff[i+1][h],ff[i+2][h],ff[i+3][h]='4','4','4','4'
+      when 1; ff[i][h..h+3]="4444"
+      end
+    when 'O'; ff[i][h..h+1]='44';ff[i+1][h..h+1]='44';
+    when 'L'
+      case orient
+      when 0; ff[i][h],ff[i+1][h],ff[i+2][h]='4','4','4';ff[i+2][h+1]='4';
+      when 1; ff[i][h+2]='4'; ff[i+1][h..h+2]='444';
+      when 2; ff[i][h+1],ff[i+1][h+1],ff[i+2][h+1]='4','4','4';ff[i][h]='4';
+      when 3; ff[i][h..h+2]='444'; ff[i+1][h]='4';
+      end
+    when 'J'
+      case orient
+      when 0; ff[i][h],ff[i+1][h],ff[i+2][h]='4','4','4';ff[i][h+1]='4';
+      when 1; ff[i][h]='4'; ff[i+1][h..h+2]='444';
+      when 2; ff[i][h+1],ff[i+1][h+1],ff[i+2][h+1]='4','4','4';ff[i+2][h]='4';
+      when 3; ff[i][h..h+2]='444'; ff[i+1][h+2]='4';
+      end
+    when 'T'
+      case orient
+      when 0; ff[i][h],ff[i+1][h],ff[i+2][h]='4','4','4';ff[i+1][h+1]='4';
+      when 1; ff[i][h+1]='4'; ff[i+1][h..h+2]='444';
+      when 2; ff[i][h+1],ff[i+1][h+1],ff[i+2][h+1]='4','4','4';ff[i+1][h]='4';
+      when 3; ff[i][h..h+2]='444'; ff[i+1][h+1]='4';
+      end
+    when 'Z'
+      case orient
+      when 0; ff[i][h+1]='4'; ff[i+1][h..h+1]='44';ff[i+2][h]='4';
+      when 1; ff[i][h..h+1]='44'; ff[i+1][h+1..h+2]='44';
+      end
+    when 'S'
+      case orient
+      when 0; ff[i][h]='4'; ff[i+1][h..h+1]='44';ff[i+2][h+1]='4';
+      when 1; ff[i][h+1..h+2]='44'; ff[i+1][h..h+1]='44';
+      end
+
+    end
+    map.fill_rr
+    map.clean_lines
+
+  end
 
 end

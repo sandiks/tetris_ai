@@ -57,24 +57,77 @@ class Map
       max2 = ff[i].rindex('2') #blocked cell
       max3 = ff[i].rindex('3')  #common cell
       max4 = ff[i].rindex('4')  #common cell
-      @rr[i] = [max2,max3,max4].map { |e| e.to_i  }.max 
-      
+      @rr[i] = [max2,max3,max4].map { |e| e.to_i  }.max
+
       @gaps[i] = ff[i].rindex('0',@rr[i])
       @gaps[i] = 0 if @gaps[i].nil?
     end
   end
- def repl4
+  def repl4
     ff = @field
     for i in 1..@w
       ff[i].gsub!('4','3')
     end
   end
 
+
+  def fill_field_by_rr
+    for i in 1..@w
+      ff=@field[i]
+      ff[0]='|'
+      ff[1..@rr[i]] = '3'* @rr[i]
+      ff[@gaps[i]]='0' if @gaps[i]>0
+    end
+  end
+
+  def clone_field
+    Marshal.load( Marshal.dump( @field ) )
+  end
+
+  def restore_field(ff)
+    @field = ff
+    fill_rr
+  end
+
+  def clean_lines
+    ff=@field
+    
+    removed=[]
+    min = rr[1..@w].min
+
+    (1..min).each do |h|
+      exist_gap = false
+      for i in 1..10
+        if ff[i][h]=='0'
+          exist_gap = true
+          #p "line with gaps h=#{h}"
+          break
+        end
+      end
+
+      if not exist_gap
+        removed<<h
+        for i in 1..10
+          ff[i][h]='x'
+
+        end
+      end
+    end
+
+    for i in 1..10
+      ff[i]=ff[i].gsub('x','').ljust(21,'0')
+    end
+    fill_rr
+    removed
+  end
+
   def show
+    p "show field: 10x20"
     for i in 1..@w
       row =@field[i]
       row[0]='|'
       p "#{row.gsub('0',' ')}| rr=#{@rr[i]} gg=#{@gaps[i]}"
     end
   end
+
 end
