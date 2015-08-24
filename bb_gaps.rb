@@ -111,15 +111,18 @@ class BBGaps
     tt = templ.split(' ')
     r = tt.size
     res=[]
+
     for j in i..i+r-1
       added = tt[j-i].to_i
+     
       if gg[j]>0
-     gg[j]
-        diff=6-(rr[j]-gg[j])
+
+        diff=3-(rr[j]-gg[j])
         diff=0 if diff<0
         res<<diff+added
       end
     end
+
 
     min =res.min
     min.nil? ? 0 : min/2

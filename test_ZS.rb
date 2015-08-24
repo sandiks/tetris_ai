@@ -6,11 +6,12 @@ def test_piece
   map = Map.new
 
   rr_lines = [
-    ["0 0 0 0 1 1 2 1 1 1 1","SI"],
-    ["0 3 3 1 1 1 2 0 1 3 1","OSI","0 0 0 0 0 0 0 1 0 0 0"],
+    ["0 1 0 0 0 0 1 1 1 1 1","ZTT",   "0 0 0 0 0 0 0 0 0 0 0"],
+    ["0 3 3 1 1 1 2 0 1 3 1","OSI",     "0 0 0 0 0 0 0 1 0 0 0"],
+    ["0 4 3 3 2 2 2 0 0 2 2","ZIZSSLL", "0 0 0 0 0 0 0 0 0 0 0"],
   ]
 
-  ll=1
+  ll=0
 
   line = rr_lines[ll][0]
   arr = rr_lines[ll][1]
@@ -22,7 +23,7 @@ def test_piece
 
   ss=arr.size
 
-  for i in 0..2
+  for i in 0..ss-1
 
     p "***round #{i+1}"
     map.curr_piece = arr[i]
