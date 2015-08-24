@@ -6,7 +6,7 @@ what=0
 
 def test_map
   map = Map.new
-  arr="JO"
+  arr="II"
   ornt=3
   ss=arr.size
 
@@ -16,9 +16,10 @@ def test_map
     map.curr_piece = arr[i]
     map.next_piece = arr[i+1]
     break if map.next_piece.nil?
-    
-    #Bot.make_test_round(map)
-    BlackBox.set_piece_for_field(map,map.curr_piece,[[1,0],ornt])
+
+
+    Bot.make_test_round(map)
+    #BlackBox.set_piece(map,map.curr_piece,[[1,0],ornt])
     map.show
 
   end
@@ -38,12 +39,12 @@ def test_best_players
     map.curr_piece = arr[i]
     map.next_piece = arr[i+1]
     break if map.next_piece.nil?
-    
+
     prev_rr = map.rr.clone
     Bot.make_test_round(map)
 
     show_field_h(map,prev_rr)
-   
+
   end
 end
 

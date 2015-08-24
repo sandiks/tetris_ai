@@ -28,7 +28,7 @@ class Map
     @w=w
     @h=h
 
-    @field  = Array.new(@w+1) { ' '*@h }
+    @field  = Array.new(@w+1) { '0'*@h }
     @rr   = Array.new(@w+1,0)
     @gaps   = Array.new(@w+1,0)
 
@@ -54,12 +54,19 @@ class Map
     ff = @field
 
     for i in 1..@w
-      @rr[i] = ff[i].rindex('2')
-      @rr[i] = ff[i].rindex('3') if @rr[i].nil?
-      @rr[i] = 0 if @rr[i].nil?
+      max2 = ff[i].rindex('2') #blocked cell
+      max3 = ff[i].rindex('3')  #common cell
+      max4 = ff[i].rindex('4')  #common cell
+      @rr[i] = [max2,max3,max4].map { |e| e.to_i  }.max 
       
       @gaps[i] = ff[i].rindex('0',@rr[i])
       @gaps[i] = 0 if @gaps[i].nil?
+    end
+  end
+ def repl4
+    ff = @field
+    for i in 1..@w
+      ff[i].gsub!('4','3')
     end
   end
 
@@ -67,7 +74,7 @@ class Map
     for i in 1..@w
       row =@field[i]
       row[0]='|'
-      p "#{row.gsub('0',' ')}| rr=#{@rr[i]}"
+      p "#{row.gsub('0',' ')}| rr=#{@rr[i]} gg=#{@gaps[i]}"
     end
   end
 end
