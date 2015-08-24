@@ -1,9 +1,9 @@
 require_relative  'game'
-require_relative  'bot'
-require_relative  'black_box'
+require_relative  'bb'
 require_relative  'bb_gaps'
+require_relative  'bot'
 
-####update game 
+####update game
 
 def set_settings(arr,stt)
   case arr[1]
@@ -122,7 +122,7 @@ def show_field_h(map,last=nil)
   gg = map.gaps
   p "Field 10x20"
   #p "gaps: #{map.gaps}"
-#p "last:#{last} rr:#{rr}"
+  #p "last:#{last} rr:#{rr}"
 
   for i in 1..map.w
 
@@ -132,12 +132,12 @@ def show_field_h(map,last=nil)
     ll[0]='|'
     last =rr if last.nil?
 
-
-    ll[1..last[i]] = "o"*last[i] if last[i]!=0
-    ll[last[i]+1..rr[i]] = "+"*(rr[i]-last[i]) if rr[i]-last[i]>=0
+    top = [last[i], rr[i]].min
+    ll[1..top] = "o"*top if top!=0
+    ll[top+1..rr[i]] = "+"*(rr[i]-last[i]) if rr[i]-last[i]>=0
 
     ll[gg[i]] = '-' if gg[i]!=0
-    p "#{ll}|#{i}: (last,rr) #{last[i]}-#{rr[i]}"
+    p "#{ll}|#{i}: (last,rr) #{last[i]}-#{rr[i]} gg=#{gg[i]}"
   end
 end
 
@@ -165,7 +165,7 @@ def show_field(map,last=nil)
   end
   #p rr
   #p last
-  
+
 
   10.downto(1) do |h|
     line = "|"
@@ -187,13 +187,15 @@ def clean_lines(map)
     rr.map! {|x| x=x-removed_count }
     rr[0]=0
   end
-  p "min=#{min} removed_lines=#{removed_lines} gaps=#{gg} row=#{rr}"
+  #p "min=#{min} removed_lines=#{removed_lines} gaps=#{gg} row=#{rr}"
 
   removed_lines.reverse.each{|row| (1..map.w).each { |x| gg[x]-=1 if gg[x] > row } }
-  1.upto(map.w) do |x|
-     if gg[x] == rr[x] && rr[x]!=0
-      rr[x]-=1
-      gg[x]=0
+
+  # if gap on top, remove gap and inc rr[i]
+  1.upto(map.w) do |i|
+    if gg[i] == rr[i] && rr[i]!=0
+      rr[i]-=1
+      gg[i]=0
     end
   end
 end

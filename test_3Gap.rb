@@ -18,7 +18,7 @@ def test
 
   p BBGaps.gap_belows(map,curr_p, pos)
 
-  #Bot.make_test_turn(map, curr_p, next_p)
+  #Bot.make_test_round(map, curr_p, next_p)
 
 end
 

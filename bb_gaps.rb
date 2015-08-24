@@ -15,7 +15,7 @@ class BBGaps
 
       #set piece
 
-      Bot.set_piece(map, curr_p, pos)
+      BlackBox.set_piece(map, curr_p, pos)
       BBGaps.do_shift_piece(map, curr_p, pos, res[:moves])
 
       moves

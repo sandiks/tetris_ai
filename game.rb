@@ -22,7 +22,7 @@ class Game
 end
 
 class Map
-  attr_accessor :field, :rr, :gaps, :w, :h
+  attr_accessor :field, :rr, :gaps, :w, :h, :best_curr_pos, :curr_piece, :next_piece
 
   def initialize(w=10 , h=21)
     @w=w
@@ -40,9 +40,9 @@ class Map
     rows.each do |rr|
       arr = rr.split(',')
 
-      for x in 1..arr.size
+      for i in 1..arr.size
 
-        @field[x][h] = arr[x-1]
+        @field[i][h] = arr[i-1]
       end
       h -=1
     end
@@ -53,19 +53,20 @@ class Map
   def fill_rr
     ff = @field
 
-    for x in 1..@w
-      @rr[x] = ff[x].rindex('2')
-      @rr[x] = ff[x].rindex('3') if @rr[x].nil?
-      @rr[x] = 0 if @rr[x].nil?
+    for i in 1..@w
+      @rr[i] = ff[i].rindex('2')
+      @rr[i] = ff[i].rindex('3') if @rr[i].nil?
+      @rr[i] = 0 if @rr[i].nil?
       
-      @gaps[x] = ff[x].rindex('0',@rr[x])
-      @gaps[x] = 0 if @gaps[x].nil?
+      @gaps[i] = ff[i].rindex('0',@rr[i])
+      @gaps[i] = 0 if @gaps[i].nil?
     end
   end
 
   def show
     for i in 1..@w
       row =@field[i]
+      row[0]='|'
       p "#{row.gsub('0',' ')}| rr=#{@rr[i]}"
     end
   end

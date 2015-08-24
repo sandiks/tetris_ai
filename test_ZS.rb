@@ -8,9 +8,9 @@ def test_piece
 
   rr_lines = [
     "0 1 1 2 2 1 2 2 3  0 2",
-    
+
   ]
-  
+
 
   rr_lines.each do |line|
     p "--------line #{line}"
@@ -23,13 +23,12 @@ def test_piece
     for i in 0..ss-1
 
       p "-----round #{i+1}"
-      curr_p = arr[i]
-      next_p = arr[i+1]
+      map.curr_piece = arr[i]
+      map.next_piece = arr[i+1]
+      break if map.next_piece.nil?
 
       prev_rr = map.rr.clone
-      break if next_p.nil?
-      
-      Bot.make_test_turn(map, curr_p, next_p)
+      Bot.make_test_round(map)
 
       show_field_h(map,prev_rr)
 

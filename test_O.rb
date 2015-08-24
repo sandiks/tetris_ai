@@ -12,28 +12,26 @@ def test_piece
     #{}"0 1 1 1 0 0 1 2 2 2 2",
   ]
 
+  line =rr_lines[1]
+  map.rr=line.split(' ').map{|x| x.to_i}
 
-  rr_lines.each do |line|
-    p "--------line #{line}"
+  arr = "OIIII"
+  ss=arr.size
 
-    map.rr=line.split(' ').map{|x| x.to_i}
+  for i in 0..ss-1
 
-    arr = "OIIII"
-    ss=arr.size
+    p "***round #{i+1}"
+    map.curr_piece = arr[i]
+    map.next_piece = arr[i+1]
+    break if map.next_piece.nil?
 
-    for i in 0..ss-1
+    prev_rr = map.rr.clone
+    Bot.make_test_round(map)
 
-      p "***round #{i+1}"
-      curr_p = arr[i]
-      next_p = arr[i+1]
-      break if next_p.nil?
-      prev_rr = map.rr.clone
-      Bot.make_test_turn(map, curr_p, next_p)
+    show_field_h(map,prev_rr)
 
-      show_field_h(map,prev_rr)
-
-    end
   end
+
 end
 
 test_piece

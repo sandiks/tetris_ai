@@ -6,33 +6,37 @@ require_relative  'helper'
 def test_piece
   map = Map.new
 
+
   rr_lines = [
-    "0 8 8 9 6 8 8 8 7 6 6",
-    "0 8 8 9 9 8 8 5 8 8 10",
-    "0 1 4 4 2 3 4 4 4 2 0",
+    ["0 8 8 9 6 8 8 8 7 6 6","TL"],
+    ["0 1 4 4 2 3 4 4 4 2 0","TL"],
+    ["0 0 3 3 3 4 4 3 4 3 3","TSTSLZJOSJII"],
   ]
 
+  ll=2
+  line = rr_lines[ll][0]
+  arr = rr_lines[ll][1]
 
-  rr_lines.each do |line|
-    p "--------line #{line}"
-    map.rr=line.split(' ').map{|x| x.to_i}
+  map.rr=line.split(' ').map{|x| x.to_i}
 
-    arr = "TOIT"
-    ss=arr.size
+  p "initial map"
+  show_field_h(map)
 
-    for i in 0..3
+  ss=arr.size
 
-      p "***round #{i+1}"
-      curr_p = arr[i]
-      next_p = arr[i+1]
-      break if next_p.nil?
-      prev_rr = map.rr.clone
+  for i in 0..0
 
-      Bot.make_test_turn(map, curr_p, next_p)
+    p "***round #{i+1}"
+    map.curr_piece = arr[i]
+    map.next_piece = arr[i+1]
+    break if map.next_piece.nil?
 
-      show_field_h(map,prev_rr)
+    prev_rr = map.rr.clone
+    Bot.make_test_round(map,[1, 3, 7, "d1 0"])
 
-    end
+    show_field_h(map,prev_rr)
+
   end
+
 end
 test_piece

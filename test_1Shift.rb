@@ -30,7 +30,7 @@ def test_piece
     prev_rr = map.rr.clone
 
 
-    p Bot.make_test_turn(map, curr_p, next_p)
+    p Bot.make_test_round(map, curr_p, next_p)
 
     #show_field_h(map,prev_rr)
     #clean_lines(map)
