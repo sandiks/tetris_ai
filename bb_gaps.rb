@@ -30,7 +30,7 @@ class BBGaps
     gg = map.gaps
     res=[]
 
-    for i in 1..10
+    for i in 1..map.w
       if gg[i]!=0
         res += fix_gap(map, i, currp)
       end
@@ -78,6 +78,7 @@ class BBGaps
     gg = map.gaps
 
     i = pos[0][0]
+
     orient = pos[1]
 
     templ = case [curr_piece,orient]
@@ -108,21 +109,33 @@ class BBGaps
     when ['T',3]; "3 1"
     end
 
+    max_level = gg.max
+    #max_gaps =gg.each_with_index.select{ |el,i| el == max_level }
+
     tt = templ.split(' ')
     r = tt.size
     res=[]
 
+begin
     for j in i..i+r-1
-      added = tt[j-i].to_i
-     
-      if gg[j]>0
 
-        diff=3-(rr[j]-gg[j])
-        diff=0 if diff<0
-        res<<diff+added
+
+
+      added = tt[j-i].to_i
+
+      if gg[j]>0 && gg[j]>=max_level-1
+
+        diff=2-(rr[j]-gg[j])
+        res<<diff+added if diff>=0
       end
     end
 
+    rescue => ex
+      p "#{j} curr #{curr_piece}"
+      puts ex.backtrace[0..5]
+    end
+
+    #p "piece=#{curr_piece} #{pos} res=#{res}" if i==3
 
     min =res.min
     min.nil? ? 0 : min/2

@@ -26,80 +26,69 @@ class BlackBox
 
   end
 
-  def self.anlz(map, show_all=false)
+  def self.anlz(map)
 
-    curr_piece = map.curr_piece
-    next_piece = map.next_piece
+    res=[]
+    res = calc_for_curr(map,[map.curr_piece,map.next_piece],0)
+    #res.min_by{|x| x[:sum]}
 
-    diff_result=[]
+  end
+
+  def self.calc_for_curr(map, pieces, level)
+
+    result=[]
+    curr_piece = pieces[level]
 
     curr_poss=get_all_pos(map.rr, curr_piece)
-    #sort
+
+
     curr_poss.sort_by!{|v| v[2]} unless  curr_poss.nil?
 
-    #curr_poss.each { |e| p e  }	 if show_all
-    curr_poss.each do |cpos|
+    curr_poss.each_with_index do |cpos,id1|
 
       ####clone
       clone0_ff = map.clone_field
 
-      curr_factor = cpos[2]+cpos[4]
+      rem_lines=[]
+      gaps_below = BBGaps.gap_belows(map,curr_piece,cpos)
+      rem_lines = Bot.set_piece(map, curr_piece, cpos)
 
-      gap_min = BBGaps.gap_belows(map,curr_piece,cpos)
+      curr_factor = cpos[2]+gaps_below
+      curr_factor+= cpos[4]-rem_lines.size
 
+      curr_result= {piece: curr_piece, pos:cpos, factor:curr_factor,gap:gaps_below,
+                    removed:rem_lines.size, sum:curr_factor, next:nil, best_next:nil}
 
-      removed0 = Bot.set_piece(map, curr_piece, cpos)
-      curr_factor = curr_factor - removed0.size + gap_min 
+      if level <1
+        res1=calc_for_curr(map , pieces , level+1)
+        curr_result[:next] = res1
+        curr_result[:best_next] = res1.min_by{|x| x[:sum]}
+        curr_result[:sum] += curr_result[:best_next][:sum]
+      end
 
-      p "cpos=#{cpos} factor=#{curr_factor}"  if show_all
-
-      next_poss=get_all_pos(map.rr, next_piece)
-      next_poss.sort_by!{|v| v[2]} unless  next_poss.nil?
-
-      next_poss.each do |npos|
-        ###clone2
-        clone1_ff = map.clone_field
-        next_factor = npos[2]+npos[4]
-
-
-        gap_min1 = BBGaps.gap_belows(map,next_piece,npos)
-        removed1=Bot.set_piece(map, next_piece, npos)
-        
-        next_factor =next_factor-removed1.size+gap_min1 
-
-        #diff=find_diff(map)
-        sum = curr_factor+next_factor
-        diff_result<<{ cpos:cpos, npos:npos, factors:"level0-level1: #{curr_factor}-#{next_factor}",  sum:sum}
-
-        #restore
-        map.restore_field(clone1_ff)
+      map.restore_field(clone0_ff)
+      result<<curr_result
 
     end
-    map.restore_field(clone0_ff)
+    result
 
   end
-  diff_result
-  #find_min_level(found)
 
-end
 
-def self.get_all_pos(rr, curr_piece)
 
-  curr_found =  case curr_piece
-  when 'I'; BBLogic.anlz_I(rr)
-  when 'J'; BBLogic.anlz_J(rr)
-  when 'L'; BBLogic.anlz_L(rr)
-  when 'O'; BBLogic.anlz_O(rr)
-  when 'S'; BBLogic.anlz_S(rr)
-  when 'Z'; BBLogic.anlz_Z(rr)
-  when 'T'; BBLogic.anlz_T(rr)
+  def self.get_all_pos(rr, curr_piece)
+
+    curr_found =  case curr_piece
+    when 'I'; BBLogic.anlz_I(rr)
+    when 'J'; BBLogic.anlz_J(rr)
+    when 'L'; BBLogic.anlz_L(rr)
+    when 'O'; BBLogic.anlz_O(rr)
+    when 'S'; BBLogic.anlz_S(rr)
+    when 'Z'; BBLogic.anlz_Z(rr)
+    when 'T'; BBLogic.anlz_T(rr)
+    end
+
   end
 
-end
-
-def self.find_diff(map)
-  rr = map.rr.drop(1)
-  rr.max-rr.min
-end
 
 end

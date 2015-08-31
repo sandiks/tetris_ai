@@ -2,72 +2,103 @@ require_relative  'helper'
 
 class Bot
 
-  def self.make_movies(gg)
+  def self.make_test_round(gg, test_pos=nil)
 
     map = gg.map
-    start = gg.this_piece_position
-    map.curr_piece = curr_p= gg.this_piece_type
-    map.next_piece = next_p= gg.next_piece_type
-
-    map.parse_from(gg.my.field)
-
-    moves = []
-
-    res = BBGaps.process_gaps(map,start)
-    if not res.nil?
-      moves+=res
-      return moves.join(',')
-    end
-
-    best_pos = Bot.process_piece(map)
-
-    if not best_pos.nil?
-      moves+=Bot.build_moves(map,curr_p,start,best_pos)
-    else
-      moves+=["no_moves"]
-    end
-
-    moves.join(',')
-
-  end
-
-  def self.process_piece(map)
-
-    poss_with_diff = BlackBox.anlz(map)
-
-    best_pos_info = poss_with_diff.sort_by{|v| v[:sum]}.first
-    best_pos = best_pos_info[:cpos]
-  end
-
-  def self.make_test_round(map, test_pos=nil)
 
     start = [3,-1]
     moves = []
 
-    curr_p =map.curr_piece
-    next_p =map.next_piece
+    curr_p=map.curr_piece= gg.this_piece_type
+    next_p=map.next_piece= gg.next_piece_type
+    gg.log=[]
+
+    #map.start_force_mode
 
 
     res = BBGaps.process_gaps(map,start)
-    p "gaps #{res}"
+    #p "gaps #{res}"
     if not res.nil?
       moves+=res
       return moves.join(',')
     end
 
     if test_pos.nil?
-      poss_with_diff = BlackBox.anlz(map, true)
+      all = BlackBox.anlz(map)
+      best=find_best(all,gg)
 
-      best_pos_info = poss_with_diff.sort_by{|v| v[:sum]}.first
-      best_pos = best_pos_info[:cpos]
+      best_pos=best[:pos]
     else
       best_pos = test_pos
     end
 
-    #map.curr_pos = best_pos
+    #p "formula: new_level+min_gap+new_gap[x2 if deleted==0]-removed"
+    remvd=Bot.set_piece(map, curr_p, best_pos)
 
-    removed=Bot.set_piece(map, curr_p, best_pos)
-    p "curr=#{curr_p} next=#{next_p} info: #{best_pos_info} removed lines=#{removed}"
+    if remvd.size>0
+      gg.my.combo+=1
+    else
+      gg.my.combo=0
+    end
+    map.combo = gg.my.combo
+
+    gg.log << "round:#{gg.round} best:#{curr_p} pos: #{best_pos} factor:#{best[:factor]} gap:#{best[:gap]} removed:#{best[:removed]} sum:#{best[:sum]} NEXT=#{best[:best_next]}"
+    #p "****level 0"
+    all.each { |e| gg.log << "#{e[:piece]}: pos: #{e[:pos].to_s.ljust(35,' ')}  f:#{e[:factor]} g:#{e[:gap]} rem:#{e[:removed]} sum:#{e[:sum]}"  }
+
+  end
+
+  def self.find_best(all,gg)
+
+    #is_force = gg.map.force_mode 
+    gg.map.force_mode=is_force = gg.need_force_mode?
+    
+    combo = gg.my.combo
+    if combo>0 && !is_force
+      all.each do |el|
+        if el[:removed]>0
+          el[:next].each { |e| e[:sum]-=combo+1 if e[:removed]>0  }
+          el[:sum]-=(2*combo+1)
+        end
+      end
+    end
+
+    if is_force
+      best = all.select { |x| x[:removed]==0 }.min_by{|x| x[:sum]}
+    else
+      best = all.min_by{|x| x[:sum]}
+    end
+  end
+
+  def self.make_movies(gg)
+
+    map = gg.map
+    start = gg.this_piece_position
+    map.curr_piece = gg.this_piece_type
+    map.next_piece = gg.next_piece_type
+
+    map.parse_from(gg.my.field)
+
+    moves = []
+    if gg.round<10
+      res = BBGaps.process_gaps(map,start)
+      if not res.nil?
+        moves+=res
+        return moves.join(',')
+      end
+    end
+
+    all = BlackBox.anlz(map)
+    best=find_best(all,gg)
+    best_pos = best[:pos]
+
+    if not best_pos.nil?
+      moves+=Bot.build_moves(map, map.curr_piece,start,best_pos)
+    else
+      moves+=["no_moves"]
+    end
+
+    moves.join(',')
 
   end
 
@@ -97,8 +128,9 @@ class Bot
     return moves
 
   end
-  
-  def self.set_piece(map, curr_piece, pos)
+
+  def self.set_piece(map, curr_piece, pos, need_clean=true)
+
 
     map.repl4
 
@@ -110,7 +142,7 @@ class Bot
     h = pos[0][1]+1
     orient = pos[1]
 
-    return if h>20
+    return [] if h>20
 
     case curr_piece
 
@@ -153,8 +185,9 @@ class Bot
       end
 
     end
+
     map.fill_rr
-    map.clean_lines
+    map.clean_lines if need_clean
 
   end
 

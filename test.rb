@@ -1,46 +1,21 @@
-
-
 require_relative  'helper'
 
-what=0
 
+what=2
 
-
-
-def test_map
-  map = Map.new
-  #arr = File.readlines('setosan.game')[1].split(' ')
-  #arr = "OISSLOOTSOJSTIZJLIOSZJLILZJOZJSJOLIZ"
-  #arr = "ZTSJSSJOISJOSLSTIJOLJJTLZSZOOJJLILZSJTSSJZOSJIZI" #my test
-  arr="LISIZLZO"
-  ss=arr.size
-
-  for i in 0..ss
-
-    p "-----round #{i+1}"
-    map.curr_piece = arr[i]
-    map.next_piece = arr[i+1]
-    break if map.next_piece.nil?
-
-    Bot.make_test_round(map)
-    map.show
-
-  end
-end
 
 def test_main
   gg = Game.new
   stt = Settings.new
   res=""
 
+
+
   File.open("cmnds.txt", "r").each do |line|
-
     s = line
-
     next if /\S/ !~ s
-
-
     arr = s.split(' ')
+
     case arr[0]
 
     when "settings"
@@ -48,25 +23,32 @@ def test_main
 
     when "update"
       update_game(arr, gg) if arr[1] == 'game'
-      update_player(arr, gg.my) if arr[1] == 'player1'
-      update_player(arr, gg.other) if arr[1] != 'player1'
+      update_player(arr, gg.my) if arr[1] == stt.your_bot
+      update_player(arr, gg.other) if arr[1] != stt.your_bot
 
     when "action"
-      p "-------round #{gg.round}"
+      currp=gg.this_piece_type
+
+      startr = 0
+      endr=startr+100
+      next if gg.round<startr || gg.round >endr
+
       map = gg.map
 
-      map.parse_from(gg.my.field)
-      map.show
-      p map.rr
+      p "-------round #{gg.round}"
+      if gg.round==startr || true
+        map.parse_from(gg.my.field)
+      end
+      #map.show
 
       start= gg.this_piece_position
-      curr_p= gg.this_piece_type
-      next_p= gg.next_piece_type
+      map.curr_piece= gg.this_piece_type
+      map.next_piece= gg.next_piece_type
 
-      res<<curr_p
+      res<<map.curr_piece
 
-      Bot.make_test_round(map, curr_p, next_p)
-
+      Bot.make_test_round(gg)
+      map.show
     end
   end
   p res
@@ -77,6 +59,6 @@ path = '/tmp/out.txt'
 #$stdout = STDOUT
 #$stdout = File.new(path, 'w')
 
-test_map if what==0
-test_main if what==1
-#system "firefox "+ path
+test_map if what==1
+test_main if what==2
+#system "chromium "+ path

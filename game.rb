@@ -8,21 +8,53 @@ end
 
 class Player
   attr_accessor :row_points, :combo, :field
+  def initialize
+    @combo=0
+  end
 end
 
 class Game
   attr_accessor :round, :this_piece_type, :next_piece_type, :this_piece_position, :time_left
   attr_accessor :map, :my, :other
+  attr_accessor :log
 
   def initialize
     @map = Map.new
     @my = Player.new
     @other = Player.new
+    @log=[]
+    @round=0
+  end
+
+  def need_force_mode?
+    map2 = Map.new
+
+    if not @other.field.nil?
+      map2.parse_from(@other.field)
+      rr2 = map2.rr[1..-1]
+      max2 = rr2.max
+      min2 = rr2.min
+
+      opp = max2-min2<12 || min2>7
+    else
+      opp = true
+    end
+
+    ###my
+
+    rr = @map.rr[1..-1]
+    max = rr.max
+    min = rr.min
+    my= max-min<12 && max<16 && min<6 && @my.combo<1
+
+    #detect force mode
+    opp && my
   end
 end
 
 class Map
-  attr_accessor :field, :rr, :gaps, :w, :h, :best_curr_pos, :curr_piece, :next_piece
+  attr_accessor :field,:nice_field, :rr, :gaps, :w, :h
+  attr_accessor :curr_piece, :next_piece, :combo, :force_mode
 
   def initialize(w=10 , h=21)
     @w=w
@@ -31,6 +63,8 @@ class Map
     @field  = Array.new(@w+1) { '0'*@h }
     @rr   = Array.new(@w+1,0)
     @gaps   = Array.new(@w+1,0)
+    @combo=0
+    @force_mode = false
 
   end
 
@@ -63,10 +97,11 @@ class Map
       @gaps[i] = 0 if @gaps[i].nil?
     end
   end
+
   def repl4
     ff = @field
     for i in 1..@w
-      ff[i].gsub!('4','3')
+      ff[i].gsub!('4','2')
     end
   end
 
@@ -75,7 +110,7 @@ class Map
     for i in 1..@w
       ff=@field[i]
       ff[0]='|'
-      ff[1..@rr[i]] = '3'* @rr[i]
+      ff[1..@rr[i]] = '2'* @rr[i]
       ff[@gaps[i]]='0' if @gaps[i]>0
     end
   end
@@ -89,32 +124,42 @@ class Map
     fill_rr
   end
 
+  def start_force_mode
+    @force_mode = true
+
+    @w =8
+    @rr   = Array.new(@w+1,0)
+    @gaps   = Array.new(@w+1,0)
+    fill_field_by_rr
+  end
+
   def clean_lines
     ff=@field
-    
+
     removed=[]
     min = rr[1..@w].min
 
     (1..min).each do |h|
-      exist_gap = false
-      for i in 1..10
-        if ff[i][h]=='0'
-          exist_gap = true
+      need_leave = false
+      for i in 1..@w
+        if ff[i][h]=='0' || ff[i][h]=='3'
+          need_leave = true
           #p "line with gaps h=#{h}"
           break
         end
       end
 
-      if not exist_gap
+      if not need_leave
         removed<<h
-        for i in 1..10
+        for i in 1..@w
           ff[i][h]='x'
 
         end
       end
     end
+    @nice_field = clone_field
 
-    for i in 1..10
+    for i in 1..@w
       ff[i]=ff[i].gsub('x','').ljust(21,'0')
     end
     fill_rr
@@ -122,11 +167,12 @@ class Map
   end
 
   def show
-    p "show field: 10x20"
+    p "show field: combo:#{@combo} force:#{force_mode} curr:#{@curr_piece} next:#{next_piece}"
     for i in 1..@w
-      row =@field[i]
+      row =@nice_field[i]
       row[0]='|'
-      p "#{row.gsub('0',' ')}| rr=#{@rr[i]} gg=#{@gaps[i]}"
+      ind = "#{i}".ljust(2,' ')
+      p "#{ind}#{row.gsub('0',' ')}| rr=#{@rr[i]} gg=#{@gaps[i]}"
     end
   end
 

@@ -2,7 +2,6 @@ require_relative  'game'
 require_relative  'helper'
 
 
-
 def test_piece
   map = Map.new
 

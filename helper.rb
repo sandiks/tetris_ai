@@ -86,34 +86,6 @@ end
 
 #######
 
-def load_rules(ptype)
-
-  res = []
-
-  file = case ptype
-  when 'I'; "rules/rI.dt"
-  when 'J'; "rules/rJ.dt"
-  when 'L'; "rules/rL.dt"
-  when 'O'; "rules/rO.dt"
-  when 'S'; "rules/rS.dt"
-  when 'Z'; "rules/rZ.dt"
-  when 'T'; "rules/rT.dt"
-  end
-
-  dir = File.dirname(__FILE__)
-  file = File.join(dir,file)
-
-  File.open(file, "r").each do |line|
-    next if /\S/ !~ line
-
-    arr = line.split(":")
-    cost = arr.size>2 ? arr[2].to_i : 3
-
-    res << [arr[0], arr[1].split(' '), cost]
-  end
-
-  res
-end
 
 def show_field_h(map,last=nil)
 
